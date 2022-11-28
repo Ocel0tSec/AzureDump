@@ -55,6 +55,13 @@ Get-Creds
 function Get-AzData{
     az ad app list --query "[].[displayName,appId]" -o tsv > Apps.csv
         Write-Host "Applications Processed"
+    az ad app list | findstr ".com" | Sort-Object | Get-Unique > Interesting_com_Urls.txt
+    az ad app list | findstr ".org" | Sort-Object | Get-Unique > Interesting_org_Urls.txt
+    az ad app list | findstr ".net" | Sort-Object | Get-Unique > Interesting_net_Urls.txt
+    az ad app list | findstr ".us" | Sort-Object | Get-Unique > Interesting_us_Urls.txt
+    az ad app list | findstr ".io" | Sort-Object | Get-Unique > Interesting_io_Urls.txt
+    az ad app list | findstr ".xyz" | Sort-Object | Get-Unique > Interesting_xyz_Urls.txt
+        Write-Host "Got Interesting URL's"
     az ad sp list --query "[].[displayName,appOwnerOrganizationId,appId,id]" --all -o tsv > ServicePrincipals.csv
         Write-Host "Service Principals Processed"
     az ad group list --query "[].[displayName,description,onPremisesNetBiosName,onPremisesDomainName,mail,id]" -o tsv > Groups.csv
@@ -102,6 +109,21 @@ Function Azure-Hound{
             cd "C:\Users\$([Environment]::UserName)\Desktop\AzureTools\AzureHound"
     ./azurehound -j $graphToken --tenant $tenant list az-ad
         Write-Host "AzureHound Complete"
+        Write-Host "Cleaning up files..."
+
+#Cleans up empty files
+}
+
+gci "C:\Users\$([Environment]::UserName)\Desktop\AzFiles" -Recurse | foreach {
+   if($_.Length -eq 0){
+      Write-Output "Removing Empty File $($_.FullName)"
+      $_.FullName | Remove-Item -Force
+   }
+   if( $_.psiscontainer -eq $true){
+      if((gci $_.FullName) -eq $null){
+         Write-Output "Removing Empty folder $($_.FullName)"
+         $_.FullName | Remove-Item -Force
+      }
 }
 
 #Run RoadRecon
