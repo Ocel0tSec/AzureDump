@@ -61,6 +61,9 @@ function Get-AzData{
     az ad app list | findstr ".us" | Sort-Object | Get-Unique > Interesting_us_Urls.txt
     az ad app list | findstr ".io" | Sort-Object | Get-Unique > Interesting_io_Urls.txt
     az ad app list | findstr ".xyz" | Sort-Object | Get-Unique > Interesting_xyz_Urls.txt
+    az ad app list | findstr "10." | Sort-Object | Get-Unique > Interesting_10_Urls.txt
+    az ad app list | findstr "172." | Sort-Object | Get-Unique > Interesting_172_Urls.txt
+    az ad app list | findstr "192." | Sort-Object | Get-Unique > Interesting_192_Urls.txt
         Write-Host "Got Interesting URL's"
     az ad sp list --query "[].[displayName,appOwnerOrganizationId,appId,id]" --all -o tsv > ServicePrincipals.csv
         Write-Host "Service Principals Processed"
