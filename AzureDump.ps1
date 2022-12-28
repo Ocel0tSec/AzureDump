@@ -41,8 +41,11 @@ else
 }
 cd "C:\Users\$([Environment]::UserName)\Desktop\AzFiles"
 
-#Prompt for Azure Active Directory Credentials 
 
+#Logs out of any accounts you were previously logged into
+az account clear
+
+#Prompt for Azure Active Directory Credentials 
 function Get-Creds{
     $azUserName = Read-Host -prompt "Enter your username (User@domain.com)" 
     $azPassword = Read-Host -prompt "Enter password"
@@ -51,7 +54,6 @@ function Get-Creds{
 Get-Creds
 
 #Queries AzAD and creates spreadsheets with app,user,group,vm,service principal info
-
 function Get-AzData{
     az ad app list --query "[].[displayName,appId]" -o tsv > Apps.csv
         Write-Host "Applications Processed"
