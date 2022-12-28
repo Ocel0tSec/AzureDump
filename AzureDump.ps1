@@ -117,7 +117,7 @@ Function Azure-Hound{
 #Cleans up empty files
 }
 
-gci "C:\Users\$([Environment]::UserName)\Desktop\AzFiles" -Recurse | foreach {
+gci "C:\Users\$([Environment]::UserName)\Desktop\AzFiles" -Recurse | foreach
    if($_.Length -eq 0){
       Write-Output "Removing Empty File $($_.FullName)"
       $_.FullName | Remove-Item -Force
