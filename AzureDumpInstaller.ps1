@@ -25,6 +25,7 @@ if (-not $noChecks.IsPresent) {
         Write-Host "`t[+] Running as administrator" -ForegroundColor Green
         Start-Sleep -Milliseconds 500
     }
+}
 
     # Ensure execution policy is unrestricted
     Write-Host "[+] Checking if execution policy is unrestricted..."
