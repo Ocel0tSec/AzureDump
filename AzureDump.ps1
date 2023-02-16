@@ -1,71 +1,52 @@
-#Runs Script as Admin
-function Use-RunAs{
-	param([Switch]$Check)
-	$IsAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
-	IF($Check) { return $IsAdmin }
-	IF($MyInvocation.ScriptName -ne ""){
-		IF(-not $IsAdmin){
-			TRY{
-				$arg = "-file `"$($MyInvocation.ScriptName)`""
-				Start-Process "$psHome\powershell.exe" -Verb Runas -ArgumentList $arg -ErrorAction 'stop'
-			}CATCH{
-				Write-Warning "Error - Failed RunAs Admin"
-				Break
-			}
-			Exit
-		}
-	}ELSE{
-		Write-Warning "Error - Not a PS1"
-		Break
-	}
-}
-Use-RunAs
+<#
+    AzureDump
 
-#Sets the execution policy
-Set-ExecutionPolicy -Scope CurrentUser Bypass -Force
+             To execute this script:
+          1) Open PowerShell window as administrator
+          2) Allow script execution by running command "Set-ExecutionPolicy Unrestricted"
+          4) Execute the script by running ".\AzureDump.ps1"
+
+You may be prompted to enter credentials several times
+This script requires a browser and is not meant to be used on headless installations
+
+          https://github.com/Ocel0tSec/AzureDump
+#>
 
 #Creates another folder where we will dump all of our files
 $FolderName = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles"
-if (Test-Path $FolderName) {
-   
+if (Test-Path $FolderName) { 
     Write-Host "You've done this before"
-    # Perform Delete file from folder operation
 }
 else
 {
-  
     #PowerShell Create directory if not exists
     New-Item $FolderName -ItemType Directory
     Write-Host "Folder Created successfully"
-
 }
 cd "C:\Users\$([Environment]::UserName)\Desktop\AzFiles"
 
-
-#Logs out of any accounts you were previously logged into
-az account clear
-
+az login 
 #Prompt for Azure Active Directory Credentials 
-function Get-Creds{
-    $azUserName = Read-Host -prompt "Enter your username (User@domain.com)" 
-    $azPassword = Read-Host -prompt "Enter password"
-        az login -u $azUserName -p $azPassword --allow-no-subscriptions
-        }
-Get-Creds
+#function Get-Creds{
+#    $azUserName = Read-Host -prompt "Enter your username (User@domain.com)" 
+#    $azPassword = Read-Host -prompt "Enter password"
+#        az login -u $azUserName -p $azPassword --allow-no-subscriptions
+#        }
+#Get-Creds
 
 #Queries AzAD and creates spreadsheets with app,user,group,vm,service principal info
 function Get-AzData{
     az ad app list --query "[].[displayName,appId]" -o tsv > Apps.csv
-        Write-Host "Applications Processed"
-    az ad app list | findstr ".com" | Sort-Object | Get-Unique > Interesting_com_Urls.txt
-    az ad app list | findstr ".org" | Sort-Object | Get-Unique > Interesting_org_Urls.txt
-    az ad app list | findstr ".net" | Sort-Object | Get-Unique > Interesting_net_Urls.txt
-    az ad app list | findstr ".us" | Sort-Object | Get-Unique > Interesting_us_Urls.txt
-    az ad app list | findstr ".io" | Sort-Object | Get-Unique > Interesting_io_Urls.txt
-    az ad app list | findstr ".xyz" | Sort-Object | Get-Unique > Interesting_xyz_Urls.txt
-    az ad app list | findstr "10." | Sort-Object | Get-Unique > Interesting_10_Urls.txt
-    az ad app list | findstr "172." | Sort-Object | Get-Unique > Interesting_172_Urls.txt
-    az ad app list | findstr "192." | Sort-Object | Get-Unique > Interesting_192_Urls.txt
+        Write-Host "Applications Processed (Press ENTER if this hangs for more than 1 minute)"
+    az ad app list | findstr ".com" | Sort-Object | Get-Unique > Interesting_Urls.txt
+    az ad app list | findstr ".org" | Sort-Object | Get-Unique >> Interesting_Urls.txt
+    az ad app list | findstr ".net" | Sort-Object | Get-Unique >> Interesting_Urls.txt
+    az ad app list | findstr ".us" | Sort-Object | Get-Unique >> Interesting_Urls.txt
+    az ad app list | findstr ".io" | Sort-Object | Get-Unique >> Interesting_Urls.txt
+    az ad app list | findstr ".xyz" | Sort-Object | Get-Unique >> Interesting_Urls.txt
+    az ad app list | findstr "10." | Sort-Object | Get-Unique >> Interesting_Urls.txt
+    az ad app list | findstr "172." | Sort-Object | Get-Unique >> Interesting_Urls.txt
+    az ad app list | findstr "192." | Sort-Object | Get-Unique >> Interesting_Urls.txt
         Write-Host "Got Interesting URL's"
     az ad sp list --query "[].[displayName,appOwnerOrganizationId,appId,id]" --all -o tsv > ServicePrincipals.csv
         Write-Host "Service Principals Processed"
@@ -79,46 +60,66 @@ function Get-AzData{
     az storage account list -o tsv > StorageAccts.csv
         Write-Host "Checking Key Vaults"
     az keyvault list -o tsv > KeyVaults.csv
-    az account list -o tsv > CurrnetAccount.csv
+    az account list -o tsv > CurrentAccount.csv
         Write-Host "Azure AD enumeration complete, Attempting MFA Bypass"
         }
 Get-AzData
 
 #Get an access token and use it to bypass MFA requirements
-function Connect-Account{ 
-$token = az account get-access-token --query accessToken --output tsv
-    Write-Host $token
-$azId = Read-Host -prompt "Enter the id from above (ex: e9c493d3-a879-42d6-beb5-012ec9095552)"
-    Write-Host $azId
-        Connect-AzAccount -AccessToken $token -AccountId $azId
+
+function PowerShellLogin{
+$body = @{
+    "client_id" =     "1950a258-227b-4e31-a9cf-717495945fc2"
+    "resource" =      "https://graph.microsoft.com"
 }
-Connect-Account 
+$UserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"
+$Headers=@{}
+$Headers["User-Agent"] = $UserAgent
+$authResponse = Invoke-RestMethod `
+    -UseBasicParsing `
+    -Method Post `
+    -Uri "https://login.microsoftonline.com/common/oauth2/devicecode?api-version=1.0" `
+    -Headers $Headers `
+    -Body $body
+$authResponse
+    Read-Host -Prompt "Sign in using the above URL and enter the code, enter Y when finished to continue"
+}
+PowerShellLogin
 
-#Run Powerzure for basic enumeration checks also tries to grab another token
-Write-Host "Running PowerZure"
-cd "C:\Users\$([Environment]::UserName)\Desktop\AzureTools\PowerZure"
-Import-Module ./PowerZure.psd1
-Get-AzureTarget | Out-File "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\TargetInfo.json"
+#Pause to authenticate
+#Read-Host -Prompt "Sign in using the above URL and enter the code, enter Y when finished to continue"
 
-#This opens a window and breaks it if MFA is enabled 
-#Get-AADIntAccessTokenForAADGraph -SaveToCache
-Write-Host "PowerZure Complete"
+function GetTokens {
+$body=@{
+    "client_id" =  "1950a258-227b-4e31-a9cf-717495945fc2"
+    "grant_type" = "urn:ietf:params:oauth:grant-type:device_code"
+    "code" =       $authResponse.device_code
+}
+$Tokens = Invoke-RestMethod `
+    -UseBasicParsing `
+    -Method Post `
+    -Uri "https://login.microsoftonline.com/Common/oauth2/token?api-version=1.0" `
+    -Headers $Headers `
+    -Body $body
+$Tokens
+}
+GetTokens
+
+#Paus to save tokens
+Read-Host "Save the refresh token and then enter Y when finished to continue"
 
 #Get the tenant Id and run AzureHound
-Function Azure-Hound{
-        Write-Host "Enumerating Tenant and running AzureHound"
-    $tenant = az account tenant list --query '[].[tenantId]' -o tsv
-    Write-Host $tenant
+Function ListTenant{
+    az account show
     $graphToken = az account get-access-token --resource-type ms-graph
     Write-Host $graphToken
             cd "C:\Users\$([Environment]::UserName)\Desktop\AzureTools\AzureHound"
     ./azurehound -j $graphToken --tenant $tenant list az-ad
-        Write-Host "AzureHound Complete"
-        Write-Host "Cleaning up files..."
-
-#Cleans up empty files
 }
+ListTenant
+Write-Host "Save the Tenant ID and the User ID"
 
+Function CleanFiles{
 gci "C:\Users\$([Environment]::UserName)\Desktop\AzFiles" -Recurse | foreach
    if($_.Length -eq 0){
       Write-Output "Removing Empty File $($_.FullName)"
@@ -129,7 +130,19 @@ gci "C:\Users\$([Environment]::UserName)\Desktop\AzFiles" -Recurse | foreach
          Write-Output "Removing Empty folder $($_.FullName)"
          $_.FullName | Remove-Item -Force
       }
+        Write-Host "Cleaning up files..."
+   }
 }
+CleanFiles
+
+Read-Host -Prompt "Open another window and run AzureHound using the TenantID, UserID, and RefreshToken 
+        Press Enter to "
+
+
+#Run CRT (Give it a client code eventually)
+cd "C:\Users\$([Environment]::UserName)\Desktop\AzureTools\CRT" 
+.\Get-CRTReport.ps1 -JobName ClientName -WorkingDirectory "C:\Users\$([Environment]::UserName)\Desktop\AzFiles"
+
 
 #Run RoadRecon
 function Road-Recon{
@@ -138,7 +151,7 @@ $azPassword = Read-Host -prompt "Enter password"
             Write-Host "Running RoadRecon"
     roadrecon auth -u $azUserName -p $azPassword
             Write-Host "Gathering"
-    roadrecon gather
+    roadrecon gather --mfa
             Write-Host "Dumping"
     roadrecon dump
             Write-Host "Checking Policies"
@@ -147,33 +160,5 @@ $azPassword = Read-Host -prompt "Enter password"
             Write-Host "RoadRecon Complete, check http://127.0.0.1:5000 for results"
 }
 Road-Recon
-
-#Get MFA Status of all users
-Write-Host "Checking all users for MFA"
-Function MFA-Check{
-$azUserName = Read-Host -prompt "Enter your username (User@domain.com)" 
-$azPassword = Read-Host -prompt "Enter password"
-$cred = New-Object -TypeName PSCredential -argumentlist $azUserName, $azPassword
-Connect-MsolService -Credential $cred
-$Report = @()
-$AzUsers = Get-MsolUser -All
-ForEach ($AzUser in $AzUsers) {
-$DefaultMFAMethod = ($AzUser.StrongAuthenticationMethods | ? { $_.IsDefault -eq "True" }).MethodType
-$MFAState = $AzUser.StrongAuthenticationRequirements.State
-if ($MFAState -eq $null) {$MFAState = "Disabled"}
-$objReport = [PSCustomObject]@{
-User = $AzUser.UserPrincipalName
-MFAState = $MFAState
-MFAPhone = $AzUser.StrongAuthenticationUserDetails.PhoneNumber
-MFAMethod = $DefaultMFAMethod
-}
-$Report += $objReport
-}
-$Report
-#Export to csv
-$Report| Export-CSV -NoTypeInformation -Encoding UTF8 "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\AzureUsersMFAstatus.csv"
-}
-MFA-Check
-
 
 Read-Host -Prompt "Complete! Press enter to exit"
