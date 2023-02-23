@@ -361,23 +361,27 @@ $auth = Get-Content -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\.
 # Save the contents of the variable to a new file
 Set-Content -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\.roadtools_auth.bak" -Value $auth
 
-Function CleanFiles{
-gci "C:\Users\$([Environment]::UserName)\Desktop\AzFiles" -Recurse | foreach
-   if($_.Length -eq 0){
-      Write-Output "Removing Empty File $($_.FullName)"
-      $_.FullName | Remove-Item -Force
-   }
-   if( $_.psiscontainer -eq $true){
-      if((gci $_.FullName) -eq $null){
-         Write-Output "Removing Empty folder $($_.FullName)"
-         $_.FullName | Remove-Item -Force
-      }
-        Write-Host "Cleaning up files..."
-   }
-}
-CleanFiles
-
 #Run CRT (Give it a client code eventually)
 C:\Users\$([Environment]::UserName)\Desktop\AzureTools\CRT\.\Get-CRTReport.ps1 -JobName CRT_Report -WorkingDirectory
+
+#Run AzureHound using session token from RoadRecon
+C:\Users\$([Environment]::UserName)\Desktop\AzureTools\AzureHound\.azurehound.exe start -j $auth list -o azure_out.json
+
+Function CleanFiles{
+    gci "C:\Users\$([Environment]::UserName)\Desktop\AzFiles" -Recurse | foreach
+       if($_.Length -eq 0){
+          Write-Output "Removing Empty File $($_.FullName)"
+          $_.FullName | Remove-Item -Force
+       }
+       if( $_.psiscontainer -eq $true){
+          if((gci $_.FullName) -eq $null){
+             Write-Output "Removing Empty folder $($_.FullName)"
+             $_.FullName | Remove-Item -Force
+          }
+            Write-Host "Cleaning up files..."
+       }
+    }
+    CleanFiles
+    
 
 Read-Host -Prompt "Complete! Press enter to exit"
