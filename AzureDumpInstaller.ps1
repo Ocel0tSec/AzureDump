@@ -26,7 +26,6 @@ if (-not $noChecks.IsPresent) {
         Start-Sleep -Milliseconds 500
     }
 }
-
     # Ensure execution policy is unrestricted
     Write-Host "[+] Checking if execution policy is unrestricted..."
     if ((Get-ExecutionPolicy).ToString() -ne "Unrestricted") {
@@ -49,7 +48,7 @@ if(${Env:ChocolateyInstall} -and (Test-Path "${Env:ChocolateyInstall}\bin\choco.
     $boxstarterVersionGood = [System.Version]$version -ge [System.Version]"3.0.0"
 }
 
-# Install Chocolatey and Boxstarter if needed
+# Install Chocolatey and Boxstarter 
 if (-not ($chocolateyVersionGood -and $boxstarterVersionGood)) {
     Write-Host "[+] Installing Boxstarter..." -ForegroundColor Cyan
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
@@ -74,6 +73,18 @@ if (-not ($chocolateyVersionGood -and $boxstarterVersionGood)) {
 }
 Import-Module "${Env:ProgramData}\boxstarter\boxstarter.chocolatey\boxstarter.chocolatey.psd1" -Force
 
+# Make `refreshenv` available right away, by defining the $env:ChocolateyInstall
+# variable and importing the Chocolatey profile module.
+# Note: Using `. $PROFILE` instead *may* work, but isn't guaranteed to.
+$env:ChocolateyInstall = Convert-Path "$((Get-Command choco).Path)\..\.."   
+Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+
+# refreshenv is now an alias for Update-SessionEnvironment
+# (rather than invoking refreshenv.cmd, the *batch file* for use with cmd.exe)
+# This should make git.exe accessible via the refreshed $env:PATH, so that it
+# can be called by name only.
+refreshenv
+
 #Install Python, go, and git, RoadRecon currently requires python3.8 to function
 choco install -y git
 choco install golang -y
@@ -92,24 +103,16 @@ Install-Module -Name PSWSMan -Force
 Install-Module -Name ExchangePowerShell -Force
 Install-Module -Name ExchangeOnlineManagement -Force
 Install-Module -Name MSOnline -Force
+Install-Module -Name PowerShellGet -Force
+Install-Module -Name ImportExcel -Force
 
-# Make `refreshenv` available right away, by defining the $env:ChocolateyInstall
-# variable and importing the Chocolatey profile module.
-# Note: Using `. $PROFILE` instead *may* work, but isn't guaranteed to.
-$env:ChocolateyInstall = Convert-Path "$((Get-Command choco).Path)\..\.."   
-Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-
-# refreshenv is now an alias for Update-SessionEnvironment
-# (rather than invoking refreshenv.cmd, the *batch file* for use with cmd.exe)
-# This should make git.exe accessible via the refreshed $env:PATH, so that it
-# can be called by name only.
-refreshenv
 
 #Installs Azure CLI
 Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi; Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'; rm .\AzureCLI.msi
 
 #Installs AzureHound
 git clone https://github.com/BloodHoundAD/AzureHound.git
+cd AzureHound
 go build -ldflags="-s -w -X github.com/bloodhoundad/azurehound/constants.Version=$(git describe tags --exact-match 2> $null -or git rev-parse HEAD)"
 
 #Invoke-WebRequest -Uri https://github.com/BloodHoundAD/AzureHound/releases/download/v1.2.3/azurehound-windows-amd64.zip -OutFile AzureHound.zip
