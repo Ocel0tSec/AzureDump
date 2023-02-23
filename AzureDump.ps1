@@ -112,7 +112,7 @@ else
 cd "C:\Users\$([Environment]::UserName)\Desktop\AzFiles"
 
 #Login via browser
-az login 
+az login --allow-no-subscriptions
 
 #Get variables for the user ID and TennantIDs
 $account = az account list | ConvertFrom-Json
