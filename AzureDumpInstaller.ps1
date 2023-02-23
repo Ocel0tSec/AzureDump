@@ -97,7 +97,7 @@ New-Item -Path "C:\Users\$([Environment]::UserName)\Desktop\AzureTools" -ItemTyp
 cd AzureTools
 
 # Installs Azure Modules 
-Write-Host "`t[+] Installing Modules" -ForegroundColor Green
+Write-Host "`Installing Modules" -ForegroundColor Cyan
 Install-Module -Name Az -Repository PSGallery -Force
 Install-Module -Name AADInternals -Force
 Install-Module -Name PSWSMan -Force
@@ -110,7 +110,7 @@ Start-Sleep -Milliseconds 500
 Write-Host "`t[+] Modules Installed" -ForegroundColor Green
 
 #Installs Azure CLI
-Write-Host "`t[+] Installing Azure CLI" -ForegroundColor Green
+Write-Host "`Installing Azure CLI" -ForegroundColor Cyan
 Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi; Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'; rm .\AzureCLI.msi
 Start-Sleep -Milliseconds 500
 Write-Host "`t[+] Azure CLI installed" -ForegroundColor Green
@@ -120,7 +120,7 @@ $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";"
 
 
 #Installs AzureHound
-Write-Host "`t[+] Installing AzureHound" -ForegroundColor Green
+Write-Host "`Installing AzureHound" -ForegroundColor Cyan
 git clone https://github.com/BloodHoundAD/AzureHound.git
 cd AzureHound
 go build -ldflags="-s -w -X github.com/bloodhoundad/azurehound/constants.Version=$(git describe tags --exact-match 2> $null -or git rev-parse HEAD)"
@@ -128,20 +128,20 @@ Start-Sleep -Milliseconds 500
 Write-Host "`t[+] AzureHound Installed" -ForegroundColor Green
 
 #Installs RoadRecon
-Write-Host "`t[+] Installing RoadRecon" -ForegroundColor Green
+Write-Host "`Installing RoadRecon" -ForegroundColor Cyan
 py -m pip install roadrecon
 cd "\Users\$([Environment]::UserName)\Desktop\AzureTools"
 Start-Sleep -Milliseconds 500
 Write-Host "`t[+] RoadRecon Installed" -ForegroundColor Green
 
 #Installs PowerZure
-Write-Host "`t[+] Installing PowerZure" -ForegroundColor Green
+Write-Host "`Installing PowerZure" -ForegroundColor Cyan
 git clone https://github.com/hausec/PowerZure.git
 Start-Sleep -Milliseconds 500
 Write-Host "`t[+] PowerZure Installed" -ForegroundColor Green
 
 #Installs Crowdstrike Reporting Tool
-Write-Host "`t[+] Installing CrowdStrike Reporting Tool" -ForegroundColor Green
+Write-Host "`Installing CrowdStrike Reporting Tool" -ForegroundColor Cyan
 git clone https://github.com/CrowdStrike/CRT.git
 Start-Sleep -Milliseconds 500
 Write-Host "`t[+] CRT Installed" -ForegroundColor Green
