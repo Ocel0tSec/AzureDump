@@ -112,7 +112,7 @@ else
 cd "C:\Users\$([Environment]::UserName)\Desktop\AzFiles"
 
 #Login via browser
-az login --allow-no-subscriptions
+az login 
 
 #Get variables for the user ID and TennantIDs
 $account = az account list | ConvertFrom-Json
@@ -331,17 +331,11 @@ function Get-AzData {
 
     # Save workbook
     $workbook.SaveAs("C:\Users\$([Environment]::UserName)\Desktop\AzFiles\AzData.xlsx")
-
-    # Close workbook
-    $workbook.Close()
-
-    # Quit Excel
-    $workbook.Quit()
 }
 Get-AzData
 
 #Run RoadRecon
-function RoadRecon{
+function RunRoadRecon{
         Write-Host "Running RoadRecon"
         roadrecon auth --device-code
                 Write-Host "Gathering"
@@ -353,7 +347,7 @@ function RoadRecon{
         roadrecon-gui
                 Write-Host "RoadRecon Complete, check http://127.0.0.1:5000 for results"
     }
-    RoadRecon
+    RunRoadRecon
 
 # Read the contents of the file into a variable
 $auth = Get-Content -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\.roadtools_auth"
