@@ -344,8 +344,6 @@ function RunRoadRecon{
         roadrecon dump
                 Write-Host "Checking Policies"
         roadrecon plugin policies
-        roadrecon-gui
-                Write-Host "RoadRecon Complete, check http://127.0.0.1:5000 for results"
     }
     RunRoadRecon
 
@@ -376,6 +374,10 @@ Function CleanFiles{
        }
     }
     CleanFiles
+
+#Start RoadRecon GUI
+roadrecon-gui
+Write-Host "RoadRecon Complete, check http://127.0.0.1:5000 for results"
     
 
 Read-Host -Prompt "Complete! Press enter to exit"
