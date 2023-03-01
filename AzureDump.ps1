@@ -27,7 +27,7 @@ function LoginToAzure {
         $azAccountId = $_.id
     }
 
-    Write-Host "`t[+] ID:`t`t$($azAccountId)" -ForegroundColor Green; `
+    Write-Host "`t[+] ID:`t`t`t$($azAccountId)" -ForegroundColor Green; `
     Write-Host "`t[+] Tenant ID:`t$($azTenantId)" -ForegroundColor Green; `
     Write-Host "`t[+] Username:`t$($azUser)" -ForegroundColor Green; `
     Write-Host "`t[+] State:`t`t$($azState)" -ForegroundColor Green;
@@ -75,15 +75,15 @@ function Get-AzData{
     Get-ADApplicationsWithCredentials
     
     # Get list of interesting URLs from applications
-    az ad app list | findstr ".com" | Sort-Object | Get-Unique > Interesting_Urls.txt
-    az ad app list | findstr ".org" | Sort-Object | Get-Unique >> Interesting_Urls.txt
-    az ad app list | findstr ".net" | Sort-Object | Get-Unique >> Interesting_Urls.txt
-    az ad app list | findstr ".us" | Sort-Object | Get-Unique >> Interesting_Urls.txt
-    az ad app list | findstr ".io" | Sort-Object | Get-Unique >> Interesting_Urls.txt
-    az ad app list | findstr ".xyz" | Sort-Object | Get-Unique >> Interesting_Urls.txt
-    az ad app list | findstr "10." | Sort-Object | Get-Unique >> Interesting_Urls.txt
-    az ad app list | findstr "172." | Sort-Object | Get-Unique >> Interesting_Urls.txt
-    az ad app list | findstr "192." | Sort-Object | Get-Unique >> Interesting_Urls.txt
+    az ad app list | findstr ".com" | Sort-Object | Get-Unique > "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Interesting_Urls.txt"
+    az ad app list | findstr ".org" | Sort-Object | Get-Unique >> "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Interesting_Urls.txt"
+    az ad app list | findstr ".net" | Sort-Object | Get-Unique >> "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Interesting_Urls.txt"
+    az ad app list | findstr ".us" | Sort-Object | Get-Unique >> "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Interesting_Urls.txt"
+    az ad app list | findstr ".io" | Sort-Object | Get-Unique >> "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Interesting_Urls.txt"
+    az ad app list | findstr ".xyz" | Sort-Object | Get-Unique >> "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Interesting_Urls.txt"
+    az ad app list | findstr "10." | Sort-Object | Get-Unique >> "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Interesting_Urls.txt"
+    az ad app list | findstr "172." | Sort-Object | Get-Unique >> "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Interesting_Urls.txt"
+    az ad app list | findstr "192." | Sort-Object | Get-Unique >> "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Interesting_Urls.txt"
     Write-Host "`t[+] Got Interesting URL's" -ForegroundColor Green
     Start-Sleep -Milliseconds 500
 
@@ -105,12 +105,12 @@ function Get-AzData{
 
 
     # Get list of groups
-    az ad group list --query "[].[displayName,description,onPremisesNetBiosName,onPremisesDomainName,mail,id]" -o tsv > Groups.csv
+    az ad group list --query "[].[displayName,description,onPremisesNetBiosName,onPremisesDomainName,mail,id]" -o tsv > "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Groups.csv"
     Write-Host "`t[+] Groups Processed" -ForegroundColor Green
     Start-Sleep -Milliseconds 500
     
     # Get list of users
-    az ad user list --query "[].[displayName,mail,businessPhones,mobilePhone,id,jobTitle,officeLocation,givenName,surname,userPrincipalName]" -o tsv > Users.csv
+    az ad user list --query "[].[displayName,mail,businessPhones,mobilePhone,id,jobTitle,officeLocation,givenName,surname,userPrincipalName]" -o tsv > "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Users.csv"
     Write-Host "`t[+] Users Processed" -ForegroundColor Green
     Start-Sleep -Milliseconds 500
     
@@ -186,6 +186,7 @@ function Get-AzGraphData{
 #Create an Excel sheet and add data for each .csv
 function Export-AppsToExcel {
 
+    Write-Host "Generating Excel Sheets" -ForegroundColor Cyan
     # import the CSV data and set the column names
     $data = Import-Csv -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Apps.csv" -Header "DisplayName"
     
@@ -277,7 +278,6 @@ function Add-CredentialsColumnsToApplicationsFile {
 
     # Check if CSV file exists
     if (-not (Test-Path $csvFilePath)) {
-        Write-Host "ADApplicationsWithCredentials.csv not found. Aborting." -ForegroundColor Red
         return
     }
 
@@ -797,7 +797,6 @@ function Export-VMsToExcel {
     }
 
     else {
-    Write-Warning "No VMs found to export"
     }
 }
 # call the function to export the data to an Excel file
@@ -899,7 +898,6 @@ function Export-StorageAccountsToExcel {
     }
 
     else {
-        Write-Warning "No VMs found to export"
         }
 }
 
@@ -912,7 +910,7 @@ function Export-KeyVaultsToExcel {
     #Set Filepath
     $kvfilePath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\VMs.csv"
 
-    if (Test-Path $filePath) {
+    if (Test-Path $kvfilePath) {
 
         # import the CSV data and set the column names
         $data = Import-Csv -Path $kvfilePath -Header "name","location","resourceGroup"
@@ -1002,9 +1000,8 @@ function Export-KeyVaultsToExcel {
         [System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel) | Out-Null
     }
     else {
-        Write-Warning "No VMs found to export"
             }
     }
 # call the function to export the data to an Excel file
 Export-KeyVaultstoExcel
-    
+
