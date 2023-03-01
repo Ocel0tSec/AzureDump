@@ -96,6 +96,9 @@ cd "\Users\$([Environment]::UserName)\Desktop"
 New-Item -Path "C:\Users\$([Environment]::UserName)\Desktop\AzureTools" -ItemType directory
 cd AzureTools
 
+#Install NuGet
+Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
+
 # Installs Azure Modules 
 Write-Host "`Installing Modules" -ForegroundColor Cyan
 Install-Module -Name Az -Repository PSGallery -Force
