@@ -998,10 +998,149 @@ function Export-KeyVaultsToExcel {
         [System.Runtime.Interopservices.Marshal]::ReleaseComObject($worksheet) | Out-Null
         [System.Runtime.Interopservices.Marshal]::ReleaseComObject($workbook) | Out-Null
         [System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel) | Out-Null
+        
     }
     else {
             }
     }
 # call the function to export the data to an Excel file
 Export-KeyVaultstoExcel
+Write-Host "`t[+] Export Complete" -ForegroundColor Green
+Write-Host "Merging Files" -ForegroundColor Cyan
 
+function Merge-AzureData {
+    # Define the directory path and output file name
+    $directoryPath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\"
+    $outputFileName = "AzureData.xlsx"
+    $outputFilePath = Join-Path $directoryPath $outputFileName
+
+    # Get a list of all XLSX files and the TXT file in the directory
+    $xlsxFiles = Get-ChildItem -Path $directoryPath -Filter *.xlsx
+    $txtFile = Get-ChildItem -Path $directoryPath -Filter *.txt
+
+    # Load Excel COM object
+    $excel = New-Object -ComObject Excel.Application
+    $excel.Visible = $false
+    $excel.DisplayAlerts = $false
+
+    # Create a new workbook
+    $workbook = $excel.Workbooks.Add()
+
+    # Loop through each XLSX file and copy its contents to a new worksheet in the workbook
+    foreach ($xlsxFile in $xlsxFiles) {
+        $worksheet = $workbook.Worksheets.Add()
+        $worksheet.Name = $xlsxFile.BaseName
+
+        $sourceWorkbook = $excel.Workbooks.Open($xlsxFile.FullName)
+        $sourceWorksheet = $sourceWorkbook.Worksheets.Item(1)
+
+        $sourceRange = $sourceWorksheet.UsedRange
+        $sourceRowCount = $sourceRange.Rows.Count
+        $sourceColumnCount = $sourceRange.Columns.Count
+
+        $destinationRange = $worksheet.Range("A1")
+        $destinationRange = $destinationRange.Resize($sourceRowCount, $sourceColumnCount)
+
+        $sourceRange.Copy($destinationRange)
+
+        $sourceWorkbook.Close()
+    }
+
+    # Add the contents of the TXT file to a new worksheet in the workbook
+    $worksheet = $workbook.Worksheets.Add()
+    $worksheet.Name = $txtFile.BaseName
+
+    $txtContent = Get-Content $txtFile.FullName
+    $currentRow = 1
+    $txtContent | ForEach-Object {
+        $worksheet.Cells.Item($currentRow, 1).Value2 = $_
+        $currentRow++
+    }
+
+    # Autofit columns in all worksheets
+    foreach ($worksheet in $workbook.Worksheets) {
+        $worksheet.Columns.AutoFit() | Out-Null
+    }
+
+    # Save the merged data to a new XLSX file
+    $workbook.SaveAs($outputFilePath, [Microsoft.Office.Interop.Excel.XlFileFormat]::xlOpenXMLWorkbook)
+    $workbook.Close()
+
+    # Quit Excel
+    $excel.Quit()
+    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel) | Out-Null
+}
+$null = Merge-AzureData
+
+Write-Host "`t[+] Merge Complete!" -ForegroundColor Green
+Write-Host "Cleaning Up..." -ForegroundColor Cyan
+
+#Clean Up Files
+function Clean-AzureFiles {
+    $directoryPath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\"
+    $files = Get-ChildItem $directoryPath | Where-Object { $_.Name -ne "AzureData.xlsx" }
+    foreach ($file in $files) {
+        Remove-Item $file.FullName
+    }
+}
+Clean-AzureFiles
+Write-Host "`t[+] AzureData.xlsx should be located in C:\Users\$([Environment]::UserName)\Desktop\AzFiles\" -ForegroundColor Green
+
+# Prompt user to confirm whether to run RoadRecon
+$confirmationMessage = "Do you want to run RoadRecon? (yes/no):"
+Write-Host -NoNewLine $confirmationMessage -ForegroundColor Cyan
+$confirmation = Read-Host
+# Check user input
+if ($confirmation -eq "yes") {
+    # Run RoadRecon
+    function Run-RoadRecon{
+        Write-Host "Running RoadRecon"
+        roadrecon auth --device-code
+                Write-Host "Gathering"
+        roadrecon gather --mfa
+                Write-Host "Dumping"
+        roadrecon dump
+                Write-Host "Checking Policies"
+        roadrecon plugin policies
+    }
+    Run-RoadRecon
+
+    # Read device code auth and store into a variable
+    $auth = Get-Content -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\.roadtools_auth"
+
+    # Save the contents of the variable to a new file
+    Set-Content -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\.roadtools_auth.bak" -Value $auth
+
+    RunRoadRecon
+} else {
+    Write-Host "RoadRecon not run."
+}
+
+# Prompt user to confirm whether to run AzureHound
+$confirmationMessage = "Do you want to run AzureHound? (yes/no):"
+Write-Host -NoNewLine $confirmationMessage -ForegroundColor Cyan
+$confirmation = Read-Host
+# Check user input
+if ($confirmation -eq "yes") {
+C:\Users\$([Environment]::UserName)\Desktop\AzureTools\AzureHound\.azurehound.exe start -j $auth list -o azure_out.json
+} else {
+    Write-Host "AzureHound not run."
+}
+
+# Prompt user to confirm whether to run CRT
+$confirmationMessage = "Do you want to run CrowdStrike Reporting Tool? (yes/no):"
+Write-Host -NoNewLine $confirmationMessage -ForegroundColor Cyan
+$confirmation = Read-Host
+# Check user input
+if ($confirmation -eq "yes") {
+C:\Users\$([Environment]::UserName)\Desktop\AzureTools\CRT\.\Get-CRTReport.ps1 -JobName CRT_Report -WorkingDirectory
+#Run CRT (Give it a client code eventually)
+cd "C:\Users\$([Environment]::UserName)\Desktop\AzureTools\CRT" 
+.\Get-CRTReport.ps1 -JobName ClientName -WorkingDirectory "C:\Users\$([Environment]::UserName)\Desktop\AzFiles"
+} else {
+    Write-Host "AzureHound not run."
+}
+
+#Start the RoadRecon GUI
+roadrecon-gui
+Write-Host "RoadRecon Complete, check http://127.0.0.1:5000 for results"
