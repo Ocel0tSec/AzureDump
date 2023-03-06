@@ -63,7 +63,7 @@ function Get-AzData{
             Write-Error $appList
         } else {
             if (![string]::IsNullOrEmpty($appList)) {
-                Write-Host "`t[!] Azure AD Applications with Credentials Processed" -ForegroundColor Orange
+                Write-Host "`t[!] Azure AD Applications with Credentials Processed" -ForegroundColor DarkYellow
                 $filePath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\ADApplicationsWithCredentials.csv"
                 $appList | Out-File -FilePath $filePath
                 Start-Sleep -Milliseconds 500
@@ -116,7 +116,7 @@ function Get-AzData{
 
     #TEST for business phones
 
-    az ad user list --query "[].{displayName: displayName, mail: mail, businessPhone: businessPhones[0] || 'N/A', mobilePhone: mobilePhone || 'N/A', id: objectId, jobTitle: jobTitle, officeLocation: officeLocation, givenName: givenName, surname: surname, userPrincipalName: userPrincipalName}" -o tsv > "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Users.csv"
+    az ad user list --query "[].{DisplayName:displayName, Eail:mail, BusinessPhone:businessPhones[0], MobilePhone:mobilePhone, Id:id, JobTitle:jobTitle, OfficeLocation:officeLocation, GivenName:givenName, Surname:surname, UserPrincipalName:userPrincipalName}" -o tsv > "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Users.csv"
     Write-Host "`t[+] Users Processed" -ForegroundColor Green
     Start-Sleep -Milliseconds 500
     
@@ -542,12 +542,15 @@ function Export-GroupsToExcel {
 }
 Export-GroupsToExcel
 
+
+
+
 #Create an Excel sheet for Users
 function Export-UsersToExcel {
 
     # import the CSV data and set the column names
     $data = Import-Csv -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Users.csv" -Header "DisplayName","mail","BusinessPhone","MobilePhone","Id","JobTitle","OfficeLocation","GivenName","Surname","UserPrincipalName"
-    
+
     # load the Excel COM object
     $excel = New-Object -ComObject Excel.Application
 
@@ -683,6 +686,9 @@ function Export-UsersToExcel {
 }
 Export-UsersToExcel
 
+
+
+
 #Create an Excel sheet and add data for each .csv
 function Export-VMsToExcel {
 
@@ -694,6 +700,7 @@ function Export-VMsToExcel {
             
         # import the CSV data and set the column names
         $data = Import-Csv -Path -Path $vmFilePath -Header "name","location","resourceGroup","osDisk.name","osType"
+        
         
         # load the Excel COM object
         $excel = New-Object -ComObject Excel.Application
