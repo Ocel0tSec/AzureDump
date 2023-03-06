@@ -110,7 +110,13 @@ function Get-AzData{
     Start-Sleep -Milliseconds 500
     
     # Get list of users
-    az ad user list --query "[].[displayName,mail,businessPhones,mobilePhone,id,jobTitle,officeLocation,givenName,surname,userPrincipalName]" -o tsv > "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Users.csv"
+    #az ad user list --query "[].[displayName,mail,[0].businessPhones[0],mobilePhone,id,jobTitle,officeLocation,givenName,surname,userPrincipalName]" -o tsv > "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Users.csv"
+    #Write-Host "`t[+] Users Processed" -ForegroundColor Green
+    #Start-Sleep -Milliseconds 500
+
+    #TEST for business phones
+
+    az ad user list --query "[].{displayName: displayName, mail: mail, businessPhone: businessPhones[0] || 'N/A', mobilePhone: mobilePhone || 'N/A', id: objectId, jobTitle: jobTitle, officeLocation: officeLocation, givenName: givenName, surname: surname, userPrincipalName: userPrincipalName}" -o tsv > "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Users.csv"
     Write-Host "`t[+] Users Processed" -ForegroundColor Green
     Start-Sleep -Milliseconds 500
     
@@ -172,16 +178,6 @@ Get-keyVaultList
 
 }
 Get-AzData
-
-#Use the GRAPH API to query good info from the tenant 
-function Get-AzGraphData{
-    
-    # Get list of conditional access policies
-    az rest --method GET --uri https://graph.microsoft.com/v1.0/identity/conditionalAccess/policies | ConvertFrom-Json | Export-Excel -Path "ConditionalAccessPolicies.xlsx" -WorksheetName "Conditional Access Policies" -AutoSize
-    Write-Host "t[+] Conditional Access Policies Processed" -ForegroundColor Green
-    
-}
-
 
 #Create an Excel sheet and add data for each .csv
 function Export-AppsToExcel {
@@ -1086,6 +1082,17 @@ function Clean-AzureFiles {
 Clean-AzureFiles
 Write-Host "`t[+] AzureData.xlsx should be located in C:\Users\$([Environment]::UserName)\Desktop\AzFiles\" -ForegroundColor Green
 
+
+<#
+#Use the GRAPH API to query good info from the tenant 
+function Get-AzGraphData{
+    
+    # Get list of conditional access policies
+    az rest --method GET --uri https://graph.microsoft.com/v1.0/identity/conditionalAccess/policies | ConvertFrom-Json | Export-Excel -Path "ConditionalAccessPolicies.xlsx" -WorksheetName "Conditional Access Policies" -AutoSize
+    Write-Host "t[+] Conditional Access Policies Processed" -ForegroundColor Green
+    
+}
+
 # Prompt user to confirm whether to run RoadRecon
 $confirmationMessage = "Do you want to run RoadRecon? (yes/no):"
 Write-Host -NoNewLine $confirmationMessage -ForegroundColor Cyan
@@ -1144,3 +1151,4 @@ cd "C:\Users\$([Environment]::UserName)\Desktop\AzureTools\CRT"
 #Start the RoadRecon GUI
 roadrecon-gui
 Write-Host "RoadRecon Complete, check http://127.0.0.1:5000 for results"
+#>
