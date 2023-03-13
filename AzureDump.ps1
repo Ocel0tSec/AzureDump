@@ -268,59 +268,102 @@ function Export-AppsToExcel {
 # call the function to export the data to an Excel file
 Export-AppsToExcel
 
-function Add-CredentialsColumnsToApplicationsFile {
-    # Define path to CSV file
-    $csvFilePath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\ADApplicationsWithCredentials.csv"
 
-    # Check if CSV file exists
-    if (-not (Test-Path $csvFilePath)) {
-        return
-    }
+#Check for applications that have credentials enabled and create a sheet for it
+function Export-ADApplicationsWithCredentialsToExcel {
 
-    # Load Excel COM object
+    # Import the CSV data and set the column names
+    $data = Import-Csv -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\ADApplicationsWithCredentials.csv" -Delimiter "`t" |
+        Select-Object DisplayName, AppID, @{Name="Has Key Credentials";Expression={[bool]($_.keyCredentials -ne $null)}}, @{Name="Has Password Credentials";Expression={[bool]($_.passwordCredentials -ne $null)}} 
+
+    # Load the Excel COM object
     $excel = New-Object -ComObject Excel.Application
-    $excel.Visible = $false
-    $excel.DisplayAlerts = $false
 
-    # Open Applications.xlsx workbook
-    $workbook = $excel.Workbooks.Open("C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Applications.xlsx")
+    # Make Excel visible
+    $excel.Visible = $true
+
+    # Add a new workbook
+    $workbook = $excel.Workbooks.Add()
+
+    # Get the first worksheet
     $worksheet = $workbook.Worksheets.Item(1)
 
-    # Add column headers
-    $worksheet.Cells.Item(1, 5) = "Has Key Credentials"
-    $worksheet.Cells.Item(1, 6) = "Has Password Credentials"
+    # Set the header names and format
+    $worksheet.Cells.Item(1,1) = "Display Name"
+    $worksheet.Cells.Item(1,1).Font.Bold = $true
+    $worksheet.Cells.Item(1,1).Font.ColorIndex = 2 # white
+    $worksheet.Cells.Item(1,2) = "App ID"
+    $worksheet.Cells.Item(1,2).Font.Bold = $true
+    $worksheet.Cells.Item(1,2).Font.ColorIndex = 2 # white
+    $worksheet.Cells.Item(1,3) = "Has Key Credentials"
+    $worksheet.Cells.Item(1,3).Font.Bold = $true
+    $worksheet.Cells.Item(1,3).Font.ColorIndex = 2 # white
+    $worksheet.Cells.Item(1,4) = "Has Password Credentials"
+    $worksheet.Cells.Item(1,4).Font.Bold = $true
+    $worksheet.Cells.Item(1,4).Font.ColorIndex = 2 # white
 
-    # Get list of applications with credentials from ADApplicationsWithCredentials.csv
-    $appList = Import-Csv $csvFilePath -Delimiter "`t"
+    # Set the background color of the header row
+    $headerRange = $worksheet.Range("A1:D1")
+    $headerRange.Interior.ColorIndex = 30
+    $headerRange.Font.Bold = $true
 
-    # Loop through each row in the worksheet and check if the application has credentials
+    # Start at row 2 (after the header row)
     $row = 2
-    while ($worksheet.Cells.Item($row, 1).Value2) {
-        $appId = $worksheet.Cells.Item($row, 2).Value2
 
-        $app = $appList | Where-Object { $_.appId -eq $appId }
-        if ($app) {
-            $hasKey = if ($app.keyCredentials) { "Yes" } else { "No" }
-            $hasPassword = if ($app.passwordCredentials) { "Yes" } else { "No" }
+    # Loop through the data and add each row to the worksheet
+    foreach ($item in $data) {
+        $displayName = $item.DisplayName
+        $appId = $item.AppID
+        $hasKeyCredentials = $item."Has Key Credentials"
+        $hasPasswordCredentials = $item."Has Password Credentials"
 
-            $worksheet.Cells.Item($row, 5) = $hasKey
-            $worksheet.Cells.Item($row, 6) = $hasPassword
-        }
+        $worksheet.Cells.Item($row,1) = $displayName
+        $worksheet.Cells.Item($row,2) = $appId
+        $worksheet.Cells.Item($row,3) = $hasKeyCredentials
+        $worksheet.Cells.Item($row,4) = $hasPasswordCredentials
 
+        # Increment the row counter
         $row++
     }
 
-    # Save and close workbook
-    $workbook.Save()
-    $workbook.Close()
+    # Set the background color of the rows
+    $range = $worksheet.Range("A2:D$row")
+    $fill = $range.Interior
+    $fill.Pattern = 1
+    $fill.PatternColorIndex = -4105
+    $fill.ThemeColor = 1
+    $fill.TintAndShade = 0.599993896298105
 
-    # Quit Excel
+    # set the background color of every row to a different color
+    for ($i = 2; $i -le $row; $i++) {
+        $rangeA = $worksheet.Range("A$i")
+        $rangeB = $worksheet.Range("B$i")
+        if (($i % 2) -eq 0) {
+            $rangeA.Interior.ColorIndex = 15
+            $rangeB.Interior.ColorIndex = 15
+        }
+        else {
+            $rangeA.Interior.ColorIndex = 2
+            $rangeB.Interior.ColorIndex = 2
+        }
+    }
+    # autofit the columns
+    $range = $worksheet.Range("A:B")
+    $range.EntireColumn.AutoFit() | Out-Null
+
+    # save the workbook
+    $workbook.SaveAs("C:\Users\$([Environment]::UserName)\Desktop\AzFiles\ADApplicationsWithCredentialss.xlsx", 51)
+
+    # close the workbook and Excel
+    $workbook.Close()
     $excel.Quit()
+
+    # release the COM objects
+    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($worksheet) | Out-Null
+    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($workbook) | Out-Null
     [System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel) | Out-Null
 }
-Add-CredentialsColumnsToApplicationsFile
-
-
+Export-ADApplicationsWithCredentialsToExcel
 
 function Export-ServicePrincipalsToExcel {
 
@@ -543,8 +586,6 @@ function Export-GroupsToExcel {
 Export-GroupsToExcel
 
 
-
-
 #Create an Excel sheet for Users
 function Export-UsersToExcel {
 
@@ -687,9 +728,7 @@ function Export-UsersToExcel {
 Export-UsersToExcel
 
 
-
-
-#Create an Excel sheet and add data for each .csv
+#Create an Excel sheet for VMs
 function Export-VMsToExcel {
 
     #Set Filepath
@@ -805,9 +844,8 @@ function Export-VMsToExcel {
 # call the function to export the data to an Excel file
 Export-VMsToExcel
 
-#Create an Excel sheet and add data for each .csv
-function Export-StorageAccountsToExcel {
-
+#Create an Excel sheet for storage accounts
+function Export-StorageAccountsToExcel{
     $saFilePath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\StorageAccounts.csv"
 
     # import the CSV data and set the column names
@@ -903,11 +941,10 @@ function Export-StorageAccountsToExcel {
     else {
         }
 }
-
 # call the function to export the data to an Excel file
 Export-StorageAccountsToExcel
 
-#Create an Excel sheet and add data for each .csv
+#Create an Excel sheet for Key Vaults
 function Export-KeyVaultsToExcel {
 
     #Set Filepath
