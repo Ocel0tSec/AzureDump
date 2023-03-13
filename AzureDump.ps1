@@ -64,7 +64,7 @@ function Get-AzData{
         } else {
             if (![string]::IsNullOrEmpty($appList)) {
                 Write-Host "`t[!] Azure AD Applications with Credentials Processed" -ForegroundColor DarkYellow
-                $filePath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\ADApplicationsWithCredentials.csv"
+                $filePath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\AzureApplicationsWithCredentials.csv"
                 $appList | Out-File -FilePath $filePath
                 Start-Sleep -Milliseconds 500
             } else {
@@ -269,11 +269,11 @@ function Export-AppsToExcel {
 Export-AppsToExcel
 
 
-#Check for applications that have credentials enabled and create a sheet for it
 function Export-ADApplicationsWithCredentialsToExcel {
+    Write-Host "Generating Excel Sheet for Apps with Credentials" -ForegroundColor Cyan
 
     # Import the CSV data and set the column names
-    $data = Import-Csv -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\ADApplicationsWithCredentials.csv" -Delimiter "`t" |
+    $data = Import-Csv -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\AzureApplicationsWithCredentials.csv" -Delimiter "`t" |
         Select-Object DisplayName, AppID, @{Name="Has Key Credentials";Expression={[bool]($_.keyCredentials -ne $null)}}, @{Name="Has Password Credentials";Expression={[bool]($_.passwordCredentials -ne $null)}} 
 
     # Load the Excel COM object
@@ -338,17 +338,23 @@ function Export-ADApplicationsWithCredentialsToExcel {
     for ($i = 2; $i -le $row; $i++) {
         $rangeA = $worksheet.Range("A$i")
         $rangeB = $worksheet.Range("B$i")
+        $rangeC = $worksheet.Range("C$i")
+        $rangeD = $worksheet.Range("D$i")
         if (($i % 2) -eq 0) {
             $rangeA.Interior.ColorIndex = 15
             $rangeB.Interior.ColorIndex = 15
+            $rangeC.Interior.ColorIndex = 15
+            $rangeD.Interior.ColorIndex = 15
         }
         else {
             $rangeA.Interior.ColorIndex = 2
             $rangeB.Interior.ColorIndex = 2
+            $rangeC.Interior.ColorIndex = 2
+            $rangeD.Interior.ColorIndex = 2
         }
     }
     # autofit the columns
-    $range = $worksheet.Range("A:B")
+    $range = $worksheet.Range("A:D")
     $range.EntireColumn.AutoFit() | Out-Null
 
     # save the workbook
