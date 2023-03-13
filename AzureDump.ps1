@@ -57,6 +57,7 @@ function Get-AzData{
     Get-AppList
 
     # Get list of apps with password or key credentials
+
     function Get-ADApplicationsWithCredentials {
         $appList = az ad app list --query "[?keyCredentials || passwordCredentials].[displayName, appId, keyCredentials, passwordCredentials]" -o tsv 2>&1
         if ($LASTEXITCODE -ne 0) {
@@ -65,14 +66,14 @@ function Get-AzData{
             if (![string]::IsNullOrEmpty($appList)) {
                 Write-Host "`t[!] Azure AD Applications with Credentials Processed" -ForegroundColor DarkYellow
                 $filePath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\AzureApplicationsWithCredentials.csv"
-                $appList | Out-File -FilePath $filePath
+                $appList | ConvertFrom-Csv -Delimiter "`t" -Header "DisplayName","AppID","HasKeyCredentials","HasPasswordCredentials" | Export-Csv -Path $filePath -NoTypeInformation
                 Start-Sleep -Milliseconds 500
             } else {
                 Write-Host "`t[-] No Azure AD Applications with Credentials Found" -ForegroundColor Red
             }
         }
     }
-    Get-ADApplicationsWithCredentials
+        Get-ADApplicationsWithCredentials
     
     # Get list of interesting URLs from applications
     az ad app list | findstr ".com" | Sort-Object | Get-Unique > "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Interesting_Urls.txt"
@@ -270,11 +271,13 @@ Export-AppsToExcel
 
 
 function Export-ADApplicationsWithCredentialsToExcel {
-    Write-Host "Generating Excel Sheet for Apps with Credentials" -ForegroundColor Cyan
 
     # Import the CSV data and set the column names
-    $data = Import-Csv -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\AzureApplicationsWithCredentials.csv" -Delimiter "`t" |
-        Select-Object DisplayName, AppID, @{Name="Has Key Credentials";Expression={[bool]($_.keyCredentials -ne $null)}}, @{Name="Has Password Credentials";Expression={[bool]($_.passwordCredentials -ne $null)}} 
+    $data = Import-Csv -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\AzureApplicationsWithCredentials.csv" |
+        Select-Object "displayName",
+                      "appID",
+                      @{Name="Has Key Credentials"; Expression={[bool]($_.HasKeyCredentials -eq "1")}},
+                      @{Name="Has Password Credentials"; Expression={[bool]($_.HasPasswordCredentials -eq "1")}}
 
     # Load the Excel COM object
     $excel = New-Object -ComObject Excel.Application
@@ -358,7 +361,7 @@ function Export-ADApplicationsWithCredentialsToExcel {
     $range.EntireColumn.AutoFit() | Out-Null
 
     # save the workbook
-    $workbook.SaveAs("C:\Users\$([Environment]::UserName)\Desktop\AzFiles\ADApplicationsWithCredentialss.xlsx", 51)
+    $workbook.SaveAs("C:\Users\$([Environment]::UserName)\Desktop\AzFiles\ADApplicationsWithCredentials.xlsx", 51)
 
     # close the workbook and Excel
     $workbook.Close()
