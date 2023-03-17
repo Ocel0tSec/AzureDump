@@ -278,16 +278,16 @@ function Export-GlobalAdminsToExcel {
         # Set the data starting row
         $row = 2
 
-        # Loop through each policy and populate the Excel worksheet
-        foreach ($admin in $data) {
-            $worksheet.Cells.Item($row,1) = $policy.DisplayName
-            $worksheet.Cells.Item($row,2) = $policy.Mail
-            $worksheet.Cells.Item($row,3) = $policy.OtherMails
-            $worksheet.Cells.Item($row,4) = $policy.ProxyAddresses
-            $worksheet.Cells.Item($row,5) = $policy.TelephoneNumber
-            $worksheet.Cells.Item($row,6) = $policy.sessionControls.UserPrincipalName
-            $worksheet.Cells.Item($row,7) = $policy.sessionControls.ObjectId
-            $worksheet.Cells.Item($row,8) = $policy.sessionControls.AccountEnabled
+        # Loop through data and populate the Excel worksheet
+        foreach ($item in $data) {
+            $worksheet.Cells.Item($row,1) = $item.DisplayName
+            $worksheet.Cells.Item($row,2) = $item.Mail
+            $worksheet.Cells.Item($row,3) = $item.OtherMails
+            $worksheet.Cells.Item($row,4) = $item.ProxyAddresses
+            $worksheet.Cells.Item($row,5) = $item.TelephoneNumber
+            $worksheet.Cells.Item($row,6) = $item.sessionControls.UserPrincipalName
+            $worksheet.Cells.Item($row,7) = $item.sessionControls.ObjectId
+            $worksheet.Cells.Item($row,8) = $item.sessionControls.AccountEnabled
             # Move to the next row
             $row += 1
         }
