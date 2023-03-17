@@ -48,8 +48,7 @@ function Get-GlobalAdmins{
     $globalAdmins = Get-AzureADDirectoryRoleMember -ObjectId (Get-AzureADDirectoryRole | Where-Object {$_.displayName -eq 'Global Administrator'}).ObjectId | Get-AzureADUser
     
     # Select properties to export
-    $properties = 'DisplayName', 'Mail', @{Name='OtherMails';Expression={$_.OtherMails -join ';'}}, @{Name='ProxyAddresses';Expression={$_.ProxyAddresses -join ';'}}, 'TelephoneNumber', 'UserPrincipalName', 'ObjectId', 'AccountEnabled'
-    
+    $properties = 'DisplayName', 'Mail', @{Name='OtherMails';Expression={$_.OtherMails -join ';'}}, @{Name='ProxyAddresses';Expression={$_.ProxyAddresses -join ';'}}, 'TelephoneNumber', 'UserPrincipalName', 'ObjectId', 'AccountEnabled'    
     # Export global admins to CSV file
     $globalAdmins | Select-Object $properties | Export-Csv -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\global_admins.csv" -NoTypeInformation
     }
@@ -245,19 +244,19 @@ function Export-GlobalAdminsToExcel {
         $worksheet = $workbook.Worksheets.Item(1)
 
         # Set the header names and format
-        $worksheet.Cells.Item(1,1) = "Display Name"
+        $worksheet.Cells.Item(1,1) = "DisplayName"
         $worksheet.Cells.Item(1,1).Font.Bold = $true
         $worksheet.Cells.Item(1,1).Font.ColorIndex = 2 # white
         $worksheet.Cells.Item(1,2) = "Mail"
         $worksheet.Cells.Item(1,2).Font.Bold = $true
         $worksheet.Cells.Item(1,2).Font.ColorIndex = 2 # white
-        $worksheet.Cells.Item(1,3) = "Other Mails"
+        $worksheet.Cells.Item(1,3) = "OtherMails"
         $worksheet.Cells.Item(1,3).Font.Bold = $true
         $worksheet.Cells.Item(1,3).Font.ColorIndex = 2 # white
         $worksheet.Cells.Item(1,4) = "Proxy Addresses"
         $worksheet.Cells.Item(1,4).Font.Bold = $true
         $worksheet.Cells.Item(1,4).Font.ColorIndex = 2 # white
-        $worksheet.Cells.Item(1,5) = "Telephone Number"
+        $worksheet.Cells.Item(1,5) = "TelephoneNumber"
         $worksheet.Cells.Item(1,5).Font.Bold = $true
         $worksheet.Cells.Item(1,5).Font.ColorIndex = 2 # white
         $worksheet.Cells.Item(1,6) = "UserPrincipalName"
@@ -266,7 +265,7 @@ function Export-GlobalAdminsToExcel {
         $worksheet.Cells.Item(1,7) = "ObjectId"
         $worksheet.Cells.Item(1,7).Font.Bold = $true
         $worksheet.Cells.Item(1,7).Font.ColorIndex = 2 # white
-        $worksheet.Cells.Item(1,8) = "Account Enabled"
+        $worksheet.Cells.Item(1,8) = "AccountEnabled"
         $worksheet.Cells.Item(1,8).Font.Bold = $true
         $worksheet.Cells.Item(1,8).Font.ColorIndex = 2 # white
 
@@ -285,9 +284,9 @@ function Export-GlobalAdminsToExcel {
             $worksheet.Cells.Item($row,3) = $admin.OtherMails
             $worksheet.Cells.Item($row,4) = $admin.ProxyAddresses
             $worksheet.Cells.Item($row,5) = $admin.TelephoneNumber
-            $worksheet.Cells.Item($row,6) = $admin.sessionControls.UserPrincipalName
-            $worksheet.Cells.Item($row,7) = $admin.sessionControls.ObjectId
-            $worksheet.Cells.Item($row,8) = $admin.sessionControls.AccountEnabled
+            $worksheet.Cells.Item($row,6) = $admin.UserPrincipalName
+            $worksheet.Cells.Item($row,7) = $admin.ObjectId
+            $worksheet.Cells.Item($row,8) = $admin.AccountEnabled
             # Move to the next row
             $row += 1
         }
