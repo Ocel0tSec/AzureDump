@@ -3,16 +3,11 @@ Powershell Script to enumerate AzureAD and output good data
 
 AzureDumpInstaller.ps1 will install the necessary AZ modules as well as the following tools: AADInternals by @DrAzureAD, PowerZure by @haus3c, AzureHound by the folks at bloodhound, python 3.7 (seemed to be the version required), and RoadRecon by Dirk-jan.
 
-After installing the tools you will just need to run AureDump.ps1
-This requires a user account and password and will:
+It is meant to be installed onto a fresh virtual machine for each tenant you are auditing. There are no logout functions so use this carefully. Tested on Windows 11. 
 
-1. Use Azure CLI to query for usernames, groups, applications, service principals, vm's, storage accounts, key vaults
-2. Generate am Access Token
-3. Run PowerZure 
-4. Run AADInternals (Currently removed need to get this working)
-5. Run AzureHound
-6. Run RoadRecon
-7. Get MFA status of all users
+1. Run the installer 
+2. Run AzureDump
+3. Choose what other tools you want to run (RoadRecon,CRT, etc.)
+4. Run AzureGRAPHDump
 
-The output will default to a folder on your current users desktop.
-Use http://127.0.0.1:5000 to check RoadRecon results
+This can be used by both red and blue teams. If you find a low priv account connected to azure it is possilbe to gather a ton of good data. It's most likely going to set off alerts. For blue teams it can be used as an auditing tool to check for misconfigurations and to lock down unecessary data.
