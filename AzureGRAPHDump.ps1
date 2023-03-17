@@ -230,7 +230,7 @@ function Export-GlobalAdminsToExcel {
 
     if (Test-Path $gaFilePath){
         
-        $data = Import-Csv -Path $gaFilePath -Header "DisplayName", "Mail", "OtherMails", "ProxyAddresses", "TelephoneNumber", "UserPrincipalName", "ObjectId", "AccountEnabled"
+        $data = Import-Csv -Path $gaFilePath
 
         # Load the Excel COM object
         $excel = New-Object -ComObject Excel.Application
@@ -279,15 +279,15 @@ function Export-GlobalAdminsToExcel {
         $row = 2
 
         # Loop through data and populate the Excel worksheet
-        foreach ($item in $data) {
-            $worksheet.Cells.Item($row,1) = $item.DisplayName
-            $worksheet.Cells.Item($row,2) = $item.Mail
-            $worksheet.Cells.Item($row,3) = $item.OtherMails
-            $worksheet.Cells.Item($row,4) = $item.ProxyAddresses
-            $worksheet.Cells.Item($row,5) = $item.TelephoneNumber
-            $worksheet.Cells.Item($row,6) = $item.sessionControls.UserPrincipalName
-            $worksheet.Cells.Item($row,7) = $item.sessionControls.ObjectId
-            $worksheet.Cells.Item($row,8) = $item.sessionControls.AccountEnabled
+        foreach ($admin in $data) {
+            $worksheet.Cells.Item($row,1) = $admin.DisplayName
+            $worksheet.Cells.Item($row,2) = $admin.Mail
+            $worksheet.Cells.Item($row,3) = $admin.OtherMails
+            $worksheet.Cells.Item($row,4) = $admin.ProxyAddresses
+            $worksheet.Cells.Item($row,5) = $admin.TelephoneNumber
+            $worksheet.Cells.Item($row,6) = $admin.sessionControls.UserPrincipalName
+            $worksheet.Cells.Item($row,7) = $admin.sessionControls.ObjectId
+            $worksheet.Cells.Item($row,8) = $admin.sessionControls.AccountEnabled
             # Move to the next row
             $row += 1
         }
