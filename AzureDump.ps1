@@ -43,8 +43,8 @@ function Get-AzData{
     $azFilesPath = Join-Path $desktopPath "AzFiles"
     if (!(Test-Path $azFilesPath)) {
         New-Item -Path $azFilesPath -ItemType Directory | Out-Null
-        Write-Host "`t[+] Created 'AzFiles' folder on the desktop" -ForegroundColor Green
-
+        Write-Host "Created 'AzFiles' folder on the desktop" -ForegroundColor Green
+}
 
     Write-Host "Dumping Azure" -ForegroundColor Cyan
     Start-Sleep -Milliseconds 1000
