@@ -6,6 +6,8 @@ function AzureGraphDump{
 
     #login to AzureAD
     Connect-AzureAD
+    Connect-MsolService
+    Connect-ExchangeOnline
 
 function Get-ConditionalAccessPolicies {
     # Run the az rest command and store the output as a string
@@ -53,9 +55,23 @@ function Get-GlobalAdmins{
     $globalAdmins | Select-Object $properties | Export-Csv -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\global_admins.csv" -NoTypeInformation
     }
     Get-GlobalAdmins
-    
-    
 
+    #Check for users w/ MFA Disabled/Enabled/Enforced
+    <#
+    Enabled: The user has been enrolled in MFA but has not completed the registration process. They will be prompted to complete the registration process the next time they sign in
+    Enforced: The user has been enrolled and has completed the MFA registration process. Users are automatically switched from enabled to enforced when they register for Azure AD MFA
+    Disabled: This is the default state for a new user that has not been enrolled in MFA
+    #>
+    function MfaCheck {
+        $users = Get-MsolUser -All | Select-Object UserPrincipalName, DisplayName, @{Label="MFA Status"; Expression={If($_.StrongAuthenticationMethods.Count -eq 0){"Disabled"}Else{"Enabled"}}}, @{Label="Enabled"; Expression={$_.UserPrincipalName -ne $null -and $_.BlockCredential -ne "True"}}
+        $users | Export-Csv -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\MFAEnabledUsers.csv" -NoTypeInformation
+        $users
+    }
+
+    MfaCheck    
+
+    #Get legacy mail protocols
+    Get-CASMailbox -ResultSize unlimited | Select-Object PrimarySMTPAddress, ActiveSyncEnabled, OWAEnabled, PopEnabled, ImapEnabled | Export-Csv -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\LegacyProtocols.csv" -NoTypeInformation
 
 
 function Export-ConditionalAccessPoliciesToExcel {
@@ -121,34 +137,24 @@ function Export-ConditionalAccessPoliciesToExcel {
         foreach ($policy in $policies) {
             # Populate the Created Date Time column
             $worksheet.Cells.Item($row,1) = $policy.createdDateTime
-
             # Populate the Display Name column
             $worksheet.Cells.Item($row,2) = $policy.displayName
-
             # Populate the Grant Controls column
             $worksheet.Cells.Item($row,3) = $policy.grantControls
-
             # Populate the ID column
             $worksheet.Cells.Item($row,4) = $policy.id
-
             # Populate the Modified Date Time column
             $worksheet.Cells.Item($row,5) = $policy.modifiedDateTime
-
             # Populate the Application Enforced Restrictions column
             $worksheet.Cells.Item($row,6) = $policy.sessionControls.applicationEnforcedRestrictions
-
             # Populate the Cloud App Security column
             $worksheet.Cells.Item($row,7) = $policy.sessionControls.cloudAppSecurity
-
             # Populate the Disable Resilience Defaults column
             $worksheet.Cells.Item($row,8) = $policy.sessionControls.disableResilienceDefaults
-
             # Populate the Persistent Browser column
             $worksheet.Cells.Item($row,9) = $policy.sessionControls.persistentBrowser
-
             # Populate the Sign In Frequency column
             $worksheet.Cells.Item($row,10) = $policy.sessionControls.signInFrequency
-
             # Move to the next row
             $row += 1
         }
