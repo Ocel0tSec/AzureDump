@@ -75,12 +75,15 @@ function Get-GlobalAdmins{
 
 
 function Export-ConditionalAccessPoliciesToExcel {
-    
     $caFilePath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Policies.csv"
 
-    if (Test-Path $caFilePath){
+    if (Test-Path $caFilePath) {
+        $data = Import-Csv -Path $caFilePath -Header "createdDateTime", "displayName", "grantControls", "id", "modifiedDateTime"
 
-        $data = Import-Csv -Path $caFilePath -Header "createdDateTime","displayName","grantControls","id","modifiedDateTime"
+        if ($data.Count -eq 0) {
+            Write-Host "No policies found to export."
+            return
+        }
 
         # Load the Excel COM object
         $excel = New-Object -ComObject Excel.Application
@@ -225,6 +228,11 @@ function Export-ConditionalAccessPoliciesToExcel {
 
     else {
     }
+            # Continue with the rest of the Export-ConditionalAccessPoliciesToExcel function
+    } else {
+        Write-Host "The specified CSV file ($caFilePath) does not exist."
+    }
+
 
 }
 Export-ConditionalAccessPoliciesToExcel
