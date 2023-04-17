@@ -506,44 +506,55 @@ function Export-MFAcsvToExcel {
  
 }
 Export-MFAcsvToExcel
-function MergeAndDeleteExcelFiles {
+function Merge-ExcelFilesAndCleanup {
     Write-Host "Merging Files" -ForegroundColor Cyan
 
-    $files = @("LegacyAuth.xlsx", "MFAReport.xlsx", "EnabledUsers.xlsx", "DisabledUsers.xlsx", "Roles.xlsx", "Policies.xlsx")
-    $destination = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\AzureGraphData.xlsx"
+    $sourceFilesPath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles"
+    $mergedFilePath = Join-Path -Path $sourceFilesPath -ChildPath "AzureGraphData.xlsx"
 
     $excel = New-Object -ComObject Excel.Application
     $excel.Visible = $false
-    $excel.DisplayAlerts = $false
 
-    $destinationWorkbook = $excel.Workbooks.Open($destination)
+    $mergedWorkbook = $excel.Workbooks.Add()
 
-    foreach ($file in $files) {
-        $sourcePath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\$file"
-        if (Test-Path $sourcePath) {
-            $sourceWorkbook = $excel.Workbooks.Open($sourcePath)
-            $sourceWorksheet = $sourceWorkbook.Worksheets.Item(1)
-            $sourceWorksheet.Copy($destinationWorkbook.Worksheets.Item($destinationWorkbook.Worksheets.Count))
-            $sourceWorksheet.Name = $file.Replace(".xlsx", "")
-            $closeResult = $sourceWorkbook.Close($false)
+    $csvFiles = Get-ChildItem -Path $sourceFilesPath -Filter "*.csv"
+    $xlsxFiles = Get-ChildItem -Path $sourceFilesPath -Filter "*.xlsx" | Where-Object { $_.Name -ne "AzureData.xlsx" -and $_.Name -ne "AzureGraphData.xlsx" }
+
+    $sheetIndex = 1
+
+    foreach ($file in $xlsxFiles) {
+        $sourceWorkbook = $excel.Workbooks.Open($file.FullName)
+        $sourceWorksheet = $sourceWorkbook.Worksheets.Item(1)
+        $sourceWorksheet.UsedRange.Copy()
+
+        if ($sheetIndex -eq 1) {
+            $targetWorksheet = $mergedWorkbook.Worksheets.Item(1)
+        } else {
+            $targetWorksheet = $mergedWorkbook.Worksheets.Add()
         }
+
+        $targetWorksheet.Paste()
+        $targetWorksheet.Name = $file.BaseName
+        $targetWorksheet.UsedRange.Columns.AutoFit() # Add this line to autofit the columns
+        $sourceWorkbook.Close($false)
+        $sheetIndex++
     }
 
-    $destinationWorkbook.Save()
-    $closeResult = $destinationWorkbook.Close($true)
+    $mergedWorkbook.SaveAs($mergedFilePath)
+    $mergedWorkbook.Close($true)
     $excel.Quit()
 
-    foreach ($file in $files) {
-        $sourcePath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\$file"
-        if (Test-Path $sourcePath) {
-            Remove-Item $sourcePath
-        }
-    }
+    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($mergedWorkbook) | Out-Null
+    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel) | Out-Null
 
-    [System.Runtime.InteropServices.Marshal]::ReleaseComObject($excel) | Out-Null
+    # Delete CSV and individual XLSX files
+    foreach ($file in $csvFiles + $xlsxFiles) {
+        Remove-Item -Path $file.FullName -Force
+    }
 }
 
-MergeAndDeleteExcelFiles
+# Call the function at the end of the script
+Merge-ExcelFilesAndCleanup
 
 }
 AzureGraphDump
