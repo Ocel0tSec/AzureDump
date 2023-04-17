@@ -5,9 +5,9 @@
 function AzureGraphDump{
 
     #login to AzureAD
-    Connect-AzureAD
-    Connect-MsolService
-    Connect-ExchangeOnline
+    Connect-AzureAD | Out-Null
+    Connect-MsolService | Out-Null
+    Connect-ExchangeOnline | Out-Null
 
 function Get-ConditionalAccessPolicies {
     # Run the az rest command and store the output as a string
@@ -42,8 +42,11 @@ function Export-PoliciesToCSV {
     $Policies | Select-Object -Property createdDateTime,displayName,grantControls,id,modifiedDateTime,@{Name="ApplicationEnforcedRestrictions";Expression={$_.sessionControls.applicationEnforcedRestrictions}},@{Name="CloudAppSecurity";Expression={$_.sessionControls.cloudAppSecurity}},@{Name="DisableResilienceDefaults";Expression={$_.sessionControls.disableResilienceDefaults}},@{Name="PersistentBrowser";Expression={$_.sessionControls.persistentBrowser}},@{Name="SignInFrequency";Expression={$_.sessionControls.signInFrequency}} | Export-Csv -Path $Path -NoTypeInformation
 }
 $policies = Get-ConditionalAccessPolicies
-Export-PoliciesToCSV -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Policies.csv" -Policies $policies
-
+try {
+    Export-PoliciesToCSV -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\Policies.csv" -Policies $policies
+} catch {
+    # Do nothing or handle the exception as needed
+}
 
 # Get all global admins in the organization and convert to a csv
 function Get-GlobalAdmins{
@@ -236,7 +239,7 @@ Export-ConditionalAccessPoliciesToExcel
 
 function Export-GlobalAdminsToExcel {
     
-    $gaFilePath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\global_admins.csv"
+    $gaFilePath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\global_admins.csv" 
 
     if (Test-Path $gaFilePath){
         
@@ -500,11 +503,47 @@ function Export-MFAcsvToExcel {
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($worksheet) | Out-Null
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) | Out-Null
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($excel) | Out-Null
-
-  
-
-     
+ 
 }
-  Export-MFAcsvToExcel
+Export-MFAcsvToExcel
+function MergeAndDeleteExcelFiles {
+    Write-Host "Merging Files" -ForegroundColor Cyan
+
+    $files = @("LegacyAuth.xlsx", "MFAReport.xlsx", "EnabledUsers.xlsx", "DisabledUsers.xlsx", "Roles.xlsx", "Policies.xlsx")
+    $destination = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\AzureGraphData.xlsx"
+
+    $excel = New-Object -ComObject Excel.Application
+    $excel.Visible = $false
+    $excel.DisplayAlerts = $false
+
+    $destinationWorkbook = $excel.Workbooks.Open($destination)
+
+    foreach ($file in $files) {
+        $sourcePath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\$file"
+        if (Test-Path $sourcePath) {
+            $sourceWorkbook = $excel.Workbooks.Open($sourcePath)
+            $sourceWorksheet = $sourceWorkbook.Worksheets.Item(1)
+            $sourceWorksheet.Copy($destinationWorkbook.Worksheets.Item($destinationWorkbook.Worksheets.Count))
+            $sourceWorksheet.Name = $file.Replace(".xlsx", "")
+            $closeResult = $sourceWorkbook.Close($false)
+        }
+    }
+
+    $destinationWorkbook.Save()
+    $closeResult = $destinationWorkbook.Close($true)
+    $excel.Quit()
+
+    foreach ($file in $files) {
+        $sourcePath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\$file"
+        if (Test-Path $sourcePath) {
+            Remove-Item $sourcePath
+        }
+    }
+
+    [System.Runtime.InteropServices.Marshal]::ReleaseComObject($excel) | Out-Null
+}
+
+MergeAndDeleteExcelFiles
+
 }
 AzureGraphDump
