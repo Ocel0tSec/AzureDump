@@ -426,7 +426,7 @@ function Convert-LegacyProtocolsCsvToExcel {
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($worksheet) | Out-Null
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) | Out-Null
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($excel) | Out-Null
-}
+
 
 $legacyProtocolsCsvPath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\legacyprotocols.csv"
 $legacyProtocolsExcelPath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\legacyprotocols.xlsx"
@@ -434,6 +434,7 @@ $legacyProtocolsExcelPath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles
 # Call the function to convert the CSV to Excel
 Convert-LegacyProtocolsCsvToExcel -CsvFilePath $legacyProtocolsCsvPath -OutputExcelFilePath $legacyProtocolsExcelPath
 }
+
 function Export-MFAcsvToExcel {
     $data = Import-Csv -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\MFAEnabledUsers.csv"
 
@@ -445,35 +446,56 @@ function Export-MFAcsvToExcel {
     # Set header values and formatting
     $worksheet.Cells.Item(1, 1) = "UserPrincipalName"
     $worksheet.Cells.Item(1, 1).Font.Bold = $true
-    $worksheet.Cells.Item(1, 2) = "MFA Status"
+    $worksheet.Cells.Item(1, 1).Font.ColorIndex = 2
+    $worksheet.Cells.Item(1, 2) = "Display Name"
     $worksheet.Cells.Item(1, 2).Font.Bold = $true
-    $worksheet.Cells.Item(1, 3) = "Disabled"
+    $worksheet.Cells.Item(1, 2).Font.ColorIndex = 2
+    $worksheet.Cells.Item(1, 3) = "MFA Status"
     $worksheet.Cells.Item(1, 3).Font.Bold = $true
-    $worksheet.Cells.Item(1, 4) = "Enabled"
+    $worksheet.Cells.Item(1, 3).Font.ColorIndex = 2
+    $worksheet.Cells.Item(1, 4) = "Disabled"
     $worksheet.Cells.Item(1, 4).Font.Bold = $true
+    $worksheet.Cells.Item(1, 4).Font.ColorIndex = 2
+    $worksheet.Cells.Item(1, 5) = "Enabled"
+    $worksheet.Cells.Item(1, 5).Font.Bold = $true
+    $worksheet.Cells.Item(1, 5).Font.ColorIndex = 2
 
-    $headerRange = $worksheet.Range("A1:D1")
+    $headerRange = $worksheet.Range("A1:E1")
     $headerRange.Interior.ColorIndex = 30
 
     $row = 2
 
     foreach ($expression in $data) {
         $worksheet.Cells.Item($row, 1) = $expression.UserPrincipalName
-        $worksheet.Cells.Item($row, 2) = $expression.'MFA Status'
-        $worksheet.Cells.Item($row, 3) = $expression.Disabled
-        $worksheet.Cells.Item($row, 4) = $expression.Enabled
+        $worksheet.Cells.Item($row, 2) = $expression.DisplayName
+        $worksheet.Cells.Item($row, 3) = $expression.'MFA Status'
+        $worksheet.Cells.Item($row, 4) = $expression.Disabled
+        $worksheet.Cells.Item($row, 5) = $expression.Enabled
+
+        $rangeA = $worksheet.Range("A$row")
+        $rangeB = $worksheet.Range("B$row")
+        $rangeC = $worksheet.Range("C$row")
+        $rangeD = $worksheet.Range("D$row")
+        $rangeE = $worksheet.Range("E$row")
 
         if (($row % 2) -eq 0) {
-            $worksheet.Range("A$row:D$row").Interior.ColorIndex = 15
+            $rangeA.Interior.ColorIndex = 15
+            $rangeB.Interior.ColorIndex = 15
+            $rangeC.Interior.ColorIndex = 15
+            $rangeD.Interior.ColorIndex = 15
+            $rangeE.Interior.ColorIndex = 15
         } else {
-            $worksheet.Range("A$row:D$row").Interior.ColorIndex = 2
+            $rangeA.Interior.ColorIndex = 2
+            $rangeB.Interior.ColorIndex = 2
+            $rangeC.Interior.ColorIndex = 2
+            $rangeD.Interior.ColorIndex = 2
+            $rangeE.Interior.ColorIndex = 2
         }
-
         $row += 1
     }
 
     # Autofit the columns
-    $range = $worksheet.Range("A:D")
+    $range = $worksheet.Range("A:E")
     $range.EntireColumn.AutoFit() | Out-Null
 
     $workbook.SaveAs("C:\Users\$([Environment]::UserName)\Desktop\AzFiles\MFAEnabledUsers.xlsx")
@@ -483,9 +505,10 @@ function Export-MFAcsvToExcel {
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($worksheet) | Out-Null
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) | Out-Null
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($excel) | Out-Null
-    
+
     Export-MFAcsvToExcel
 
+        
+    
 }
-
 AzureGraphDump
