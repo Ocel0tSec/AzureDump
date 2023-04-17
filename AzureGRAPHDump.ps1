@@ -434,74 +434,57 @@ $legacyProtocolsExcelPath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles
 # Call the function to convert the CSV to Excel
 Convert-LegacyProtocolsCsvToExcel -CsvFilePath $legacyProtocolsCsvPath -OutputExcelFilePath $legacyProtocolsExcelPath
 }
-function Export-MFAEnabledUsersToExcel {
+function Export-MFAcsvToExcel {
+    $data = Import-Csv -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\MFAEnabledUsers.csv"
 
-    $filePath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\MFAEnabledUsers.csv"
+    $excel = New-Object -ComObject Excel.Application
+    $excel.Visible = $true
+    $workbook = $excel.Workbooks.Add()
+    $worksheet = $workbook.Worksheets.Item(1)
 
-    if (Test-Path $filePath) {
-        $data = Import-Csv -Path $filePath
+    # Set header values and formatting
+    $worksheet.Cells.Item(1, 1) = "UserPrincipalName"
+    $worksheet.Cells.Item(1, 1).Font.Bold = $true
+    $worksheet.Cells.Item(1, 2) = "MFA Status"
+    $worksheet.Cells.Item(1, 2).Font.Bold = $true
+    $worksheet.Cells.Item(1, 3) = "Disabled"
+    $worksheet.Cells.Item(1, 3).Font.Bold = $true
+    $worksheet.Cells.Item(1, 4) = "Enabled"
+    $worksheet.Cells.Item(1, 4).Font.Bold = $true
 
-        # Load the Excel COM object
-        $excel = New-Object -ComObject Excel.Application
+    $headerRange = $worksheet.Range("A1:D1")
+    $headerRange.Interior.ColorIndex = 30
 
-        # Make Excel visible
-        $excel.Visible = $true
+    $row = 2
 
-        # Add a new workbook
-        $workbook = $excel.Workbooks.Add()
+    foreach ($expression in $data) {
+        $worksheet.Cells.Item($row, 1) = $expression.UserPrincipalName
+        $worksheet.Cells.Item($row, 2) = $expression.'MFA Status'
+        $worksheet.Cells.Item($row, 3) = $expression.Disabled
+        $worksheet.Cells.Item($row, 4) = $expression.Enabled
 
-        # Get the first worksheet
-        $worksheet = $workbook.Worksheets.Item(1)
-
-        # Set the header names and format
-        $headerNames = $data[0].PSObject.Properties.Name
-        $column = 1
-        foreach ($headerName in $headerNames) {
-            $worksheet.Cells.Item(1, $column) = $headerName
-            $worksheet.Cells.Item(1, $column).Font.Bold = $true
-            $worksheet.Cells.Item(1, $column).Font.ColorIndex = 2 # white
-            $column++
+        if (($row % 2) -eq 0) {
+            $worksheet.Range("A$row:D$row").Interior.ColorIndex = 15
+        } else {
+            $worksheet.Range("A$row:D$row").Interior.ColorIndex = 2
         }
 
-        # Set the background color of the header row
-        $headerRange = $worksheet.Range("A1:$([char]([int][char]'A'+$headerNames.Count-1))1")
-        $headerRange.Interior.ColorIndex = 30
-
-        # Set the data starting row
-        $row = 2
-
-        # Loop through each item and populate the Excel worksheet
-        foreach ($item in $data) {
-            $column = 1
-            foreach ($headerName in $headerNames) {
-                # Populate the current cell
-                $worksheet.Cells.Item($row, $column) = $item."$headerName"
-                $column++
-            }
-            # Move to the next row
-            $row += 1
-        }
-
-        # Autofit the columns
-        $range = $worksheet.Range("A:$([char]([int][char]'A'+$headerNames.Count-1))")
-        $range.EntireColumn.AutoFit() | Out-Null
-
-        # Save the workbook
-        $workbook.SaveAs("C:\Users\$([Environment]::UserName)\Desktop\AzFiles\MFAEnabledUsers.xlsx")
-
-        # Close the workbook and Excel application
-        $workbook.Close($true)
-        $excel.Quit()
-
-        # Release the COM objects
-        [System.Runtime.InteropServices.Marshal]::ReleaseComObject($worksheet) | Out-Null
-        [System.Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) | Out-Null
-        [System.Runtime.InteropServices.Marshal]::ReleaseComObject($excel) | Out-Null
+        $row += 1
     }
-    else {
-        Write-Host "File not found at $filePath"
-    }
-    Export-MFAEnabledUsersToExcel
+
+    # Autofit the columns
+    $range = $worksheet.Range("A:D")
+    $range.EntireColumn.AutoFit() | Out-Null
+
+    $workbook.SaveAs("C:\Users\$([Environment]::UserName)\Desktop\AzFiles\MFAEnabledUsers.xlsx")
+    $workbook.Close($true)
+    $excel.Quit()
+
+    [System.Runtime.InteropServices.Marshal]::ReleaseComObject($worksheet) | Out-Null
+    [System.Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) | Out-Null
+    [System.Runtime.InteropServices.Marshal]::ReleaseComObject($excel) | Out-Null
+}
+Export-MFAcsvToExcel
 
 }
 
