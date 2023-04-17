@@ -483,8 +483,8 @@ function Export-MFAcsvToExcel {
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($worksheet) | Out-Null
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) | Out-Null
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($excel) | Out-Null
-}
-Export-MFAcsvToExcel
+    
+    Export-MFAcsvToExcel
 
 }
 
