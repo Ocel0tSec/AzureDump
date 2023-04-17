@@ -426,14 +426,9 @@ function Convert-LegacyProtocolsCsvToExcel {
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($worksheet) | Out-Null
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) | Out-Null
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($excel) | Out-Null
-
-
-$legacyProtocolsCsvPath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\legacyprotocols.csv"
-$legacyProtocolsExcelPath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\legacyprotocols.xlsx"
-
-# Call the function to convert the CSV to Excel
-Convert-LegacyProtocolsCsvToExcel -CsvFilePath $legacyProtocolsCsvPath -OutputExcelFilePath $legacyProtocolsExcelPath
 }
+# Call the function to convert the CSV to Excel
+Convert-LegacyProtocolsCsvToExcel -CsvFilePath "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\legacyprotocols.csv" -OutputExcelFilePath "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\legacyprotocols.xlsx"
 
 function Export-MFAcsvToExcel {
     $data = Import-Csv -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\MFAEnabledUsers.csv"
@@ -508,7 +503,6 @@ function Export-MFAcsvToExcel {
 
     Export-MFAcsvToExcel
 
-        
-    
+     
 }
 AzureGraphDump
