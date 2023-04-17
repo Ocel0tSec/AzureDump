@@ -361,5 +361,146 @@ function Export-GlobalAdminsToExcel {
  
 Export-GlobalAdminsToExcel
 
+function Convert-LegacyProtocolsCsvToExcel {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$CsvFilePath,
+        [Parameter(Mandatory = $true)]
+        [string]$OutputExcelFilePath
+    )
+
+    $csvData = Import-Csv -Path $CsvFilePath
+
+    # Load the Excel COM object
+    $excel = New-Object -ComObject Excel.Application
+
+    # Make Excel visible
+    $excel.Visible = $true
+
+    # Add a new workbook
+    $workbook = $excel.Workbooks.Add()
+
+    # Get the first worksheet
+    $worksheet = $workbook.Worksheets.Item(1)
+
+    # Set the header names and format
+    $headers = @("PrimarySmtpAddress", "ActiveSyncEnabled", "OWAEnabled", "PopEnabled", "ImapEnabled")
+    for ($i = 1; $i -le $headers.Length; $i++) {
+        $worksheet.Cells.Item(1, $i) = $headers[$i - 1]
+        $worksheet.Cells.Item(1, $i).Font.Bold = $true
+        $worksheet.Cells.Item(1, $i).Font.ColorIndex = 2 # white
+    }
+
+    # Set the background color of the header row
+    $headerRange = $worksheet.Range("A1:E1")
+    $headerRange.Interior.ColorIndex = 30
+
+    # Set the data starting row
+    $row = 2
+
+    # Loop through data and populate the Excel worksheet
+    foreach ($item in $csvData) {
+        for ($col = 1; $col -le $headers.Length; $col++) {
+            $worksheet.Cells.Item($row, $col) = $item.($headers[$col - 1])
+        }
+        $row += 1
+    }
+
+    # Autofit the columns
+    $range = $worksheet.Range("A:E")
+    $range.EntireColumn.AutoFit() | Out-Null
+
+    # Save the workbook
+    $workbook.SaveAs($OutputExcelFilePath)
+
+    # Close the workbook and Excel application
+    $workbook.Close($true)
+    $excel.Quit()
+
+    # Release the COM objects
+    [System.Runtime.InteropServices.Marshal]::ReleaseComObject($worksheet) | Out-Null
+    [System.Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) | Out-Null
+    [System.Runtime.InteropServices.Marshal]::ReleaseComObject($excel) | Out-Null
+}
+
+$legacyProtocolsCsvPath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\legacyprotocols.csv"
+$legacyProtocolsExcelPath = "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\legacyprotocols.xlsx"
+
+# Call the function to convert the CSV to Excel
+Convert-LegacyProtocolsCsvToExcel -CsvFilePath $legacyProtocolsCsvPath -OutputExcelFilePath $legacyProtocolsExcelPath
+}
+function Export-MFAcsvToExcel {
+
+    if (Test-Path $csvFilePath) {
+        $data = Import-Csv -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\MFAEnabledUsers.csv" -Header "MFA Status", "Disablled", "Enabled"
+
+        $excel = New-Object -ComObject Excel.Application
+        $excel.Visible = $true
+        $workbook = $excel.Workbooks.Add()
+        $worksheet = $workbook.Worksheets.Item(1)
+
+        for ($i = 0; $i -lt $headerNames.Count; $i++) {
+            $worksheet.Cells.Item(1, $i + 1) = "MFA Status"
+            $worksheet.Cells.Item(1, $i + 1).Font.Bold = $true
+            $worksheet.Cells.Item(1, $i + 1).Font.ColorIndex = 2
+            $worksheet.Cells.Item(1, $i + 2) = "Disabled"
+            $worksheet.Cells.Item(1, $i + 2).Font.Bold = $true
+            $worksheet.Cells.Item(1, $i + 2).Font.ColorIndex = 2
+            $worksheet.Cells.Item(1, $i + 3) = "Enabled"
+            $worksheet.Cells.Item(1, $i + 3).Font.Bold = $true
+            $worksheet.Cells.Item(1, $i + 3).Font.ColorIndex = 2
+        }
+
+        $headerRange = $worksheet.Range("A1:C1")
+        $headerRange.Interior.ColorIndex = 30
+
+        $row = 2
+
+        foreach ($expression in $data) {
+            for ($i = 0; $i -lt $headerNames.Count; $i++) {
+                $worksheet.Cells.Item($row,1) = $expression.mfaStatus
+                $worksheet.Cells.Item($row,1) = $expression.mfaEnabled
+                $worksheet.Cells.Item($row,1) = $expression.mfaDisabled
+            }
+            $row += 1
+        }
+
+        # set the background color of the rows
+        $range = $worksheet.Range("A2:C$row")
+        $fill = $range.Interior
+        $fill.Pattern = 1
+        $fill.PatternColorIndex = -4105
+        $fill.ThemeColor = 1
+        $fill.TintAndShade = 0.599993896298105
+
+        # set the background color of every row to a different color
+        for ($i = 2; $i -le $row; $i++) {
+            $rangeA = $worksheet.Range("A$i")
+            $rangeB = $worksheet.Range("B$i")
+            $rangeC = $worksheet.Range("C$i")
+            if (($i % 2) -eq 0) {
+                $rangeA.Interior.ColorIndex = 15
+                $rangeB.Interior.ColorIndex = 15
+                $rangeC.Interior.ColorIndex = 15
+            }
+            else {
+                $rangeA.Interior.ColorIndex = 2
+                $rangeB.Interior.ColorIndex = 2
+                $rangeC.Interior.ColorIndex = 2
+            }
+        }            
+            # autofit the columns
+            $range = $worksheet.Range("A:J")
+            $range.EntireColumn.AutoFit() | Out-Null
+
+$workbook.SaveAs("C:\Users\$([Environment]::UserName)\Desktop\AzFiles\MFAEnabledUsers.xlsx")
+$workbook.Close($true)
+$excel.Quit()
+
+[System.Runtime.Interopservices.Marshal]::ReleaseComObject($worksheet) | Out-Null
+[System.Runtime.Interopservices.Marshal]::ReleaseComObject($workbook) | Out-Null
+[System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel) | Out-Null
+}
+Export-MFAcsvToExcel 
 }
 AzureGraphDump
