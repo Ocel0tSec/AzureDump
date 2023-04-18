@@ -18,13 +18,13 @@ It is meant to be installed onto a fresh virtual machine for each tenant you are
 
 This can be used by both red and blue teams. If you find a low privileged account connected to Azure, it is possible to gather a ton of useful data. It's especially valuable for gathering email addresses and phone numbers for phishing/vishing attacks when you find yourself on a low privileged account. For blue teams, it can be used as an auditing tool to check for misconfigurations and to lock down unnecessary data. Examples of this are the MFA check, legacy protocols check, Global Admin list, and the Applications with credentials. Additionally, the application URLs can sometimes contain interesting information, so be sure to review those.
 
-![image](https://user-images.githubusercontent.com/78559938/232842614-0d34bd80-7c54-4439-a627-58d93d4ffb30.png)
+![image](https://user-images.githubusercontent.com/78559938/232848475-d0c0d2d8-d9ed-41f0-8d62-cafeaf586682.png)
 
 Another feature included is the token grabber from AzureHound. This can be used in a variety of ways, so if the script doesn't work, you can just copy those tokens and try to login. It uses the device code login function.
 
 ![image](https://user-images.githubusercontent.com/78559938/232844448-31824177-896a-4278-8923-8b8adb54756d.png)
 
-AzureDump generates well-organized Excel sheets containing the gathered data. These reports provide a convenient and easy-to-read format for analyzing and understanding the information, such as user details, group memberships, application configurations, and more. These Excel sheets make it easier for both red and blue teams to evaluate their findings and plan their next steps accordingly.
+AzureDump generates well-organized Excel sheets containing the gathered data. These reports provide a convenient and easy-to-read format for analyzing and understanding the information, such as user details, group memberships, application configurations, etc. 
 
 ![image](https://user-images.githubusercontent.com/78559938/232847818-549015ac-a86e-46f4-8693-aebecec60942.png)
 
