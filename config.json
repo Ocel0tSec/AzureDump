@@ -1,38 +1,34 @@
 {
-    "scripts": [
-      {
-        "name": "AzureDump",
-        "file": "AzureDump.ps1",
-        "enabled": true
-      },
-      {
-        "name": "AzureGRAPHDump",
-        "file": "AzureGRAPHDump.ps1",
-        "enabled": true
-      },
-      
-      {
-        "name": "GetTokens", 
-        "file": "GetTokens.ps1",
-        "enabled": true
-      },
-        
-      {
-        "name": "CRT", 
-        "file": "RunCrowdStrikeReportingTool.ps1",
-        "enabled": true
-      },
-        
-      {
-        "name": "AzureHound", 
-        "file": "RunAzureHound.ps1",
-        "enabled": true
-      },
-
-      {
-        "name": "RoadRecon",
-        "file": "RunRoadRecon.ps1",
-        "enabled": true
-      }
-    ]
-  }
+  "scripts": [
+    {
+      "name": "AzureDump",
+      "file": "AzureDump.ps1",
+      "enabled": true
+    },
+    {
+      "name": "AzureGRAPHDump",
+      "file": "AzureGRAPHDump.ps1",
+      "enabled": true
+    },
+    {
+      "name": "GetTokens",
+      "file": "GetTokens.ps1",
+      "enabled": true
+    },
+    {
+      "name": "CrowdStrikeReportingTool",
+      "file": "CrowdStrikeReportingTool.ps1",
+      "enabled": true
+    },
+    {
+      "name": "AzureHound",
+      "file": "AzureHound.ps1",
+      "enabled": true
+    },
+    {
+      "name": "RoadRecon",
+      "file": "RoadRecon.ps1",
+      "enabled": true
+    }
+  ]
+}
