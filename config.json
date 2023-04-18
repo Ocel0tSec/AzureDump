@@ -1,0 +1,27 @@
+{
+    "scripts": [
+      {
+        "name": "AzureDump",
+        "file": "AzureDump.ps1",
+        "enabled": true
+      },
+      {
+        "name": "AzureGRAPHDump",
+        "file": "AzureGRAPHDump.ps1",
+        "enabled": false
+      },
+      
+      {
+        "name": "GetTokens", 
+        "file": "GetTokens.ps1",
+        "enabled": true
+      }
+
+
+
+
+
+
+
+    ]
+  }
