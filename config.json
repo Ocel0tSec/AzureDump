@@ -1,13 +1,14 @@
 {
   "scripts": [
-    {
+     {
       "name": "AzureDump",
-      "file": "AzureDump.ps1",
+      "file": "RunAzureDump.ps1",
       "enabled": true
     },
+    
     {
       "name": "AzureGRAPHDump",
-      "file": "AzureGRAPHDump.ps1",
+      "file": "RunAzureGRAPHDump.ps1",
       "enabled": true
     },
     {
@@ -16,18 +17,18 @@
       "enabled": true
     },
     {
-      "name": "CrowdStrikeReportingTool",
-      "file": "CrowdStrikeReportingTool.ps1",
+      "name": "CRT",
+      "file": "RunCrowdStrikeReportingTool.ps1",
       "enabled": true
     },
     {
       "name": "AzureHound",
-      "file": "AzureHound.ps1",
+      "file": "RunAzureHound.ps1",
       "enabled": true
     },
     {
       "name": "RoadRecon",
-      "file": "RoadRecon.ps1",
+      "file": "RunRoadRecon.ps1",
       "enabled": true
     }
   ]
