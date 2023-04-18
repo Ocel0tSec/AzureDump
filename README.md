@@ -1,10 +1,10 @@
 # AzureDump
 
-Powershell Script to enumerate AzureAD and output useful data.
+##Installer
 
-AzureDumpInstaller.ps1 will install the necessary AZ modules as well as the following tools: AADInternals by @DrAzureAD, PowerZure by @haus3c, AzureHound by the folks at BloodHound, Python 3.7 (seemed to be the version required), and RoadRecon by Dirk-jan.
+The AzureDump Installer is a streamlined PowerShell script for setting up AzureDump, a robust Azure Active Directory enumeration tool. This installer automates the installation of required AZ modules and essential tools, such as AADInternals, PowerZure, AzureHound, Python 3.7, RoadRecon, and CrowdStrike's CRT.
 
-It is meant to be installed onto a fresh virtual machine for each tenant you are auditing. There are no logout functions, so use this carefully. Tested on Windows 11.
+Designed for use on a fresh virtual machine for each audited tenant, the AzureDump Installer ensures a secure and efficient setup, tested on Windows 11. Ideal for red and blue teams, this installer simplifies the process of assessing and improving your Azure tenants' security posture by quickly configuring a comprehensive toolkit for audits, monitoring, and data gathering.
 
 ## Setup
 
