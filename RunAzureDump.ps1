@@ -1,3 +1,22 @@
+function Show-AzureDumpBanner {
+    $banner = @"
+ █████╗ ███████╗██╗   ██╗██████╗ ███████╗██████╗ ██╗   ██╗███╗   ███╗██████╗ 
+██╔══██╗╚══███╔╝██║   ██║██╔══██╗██╔════╝██╔══██╗██║   ██║████╗ ████║██╔══██╗
+███████║  ███╔╝ ██║   ██║██████╔╝█████╗  ██║  ██║██║   ██║██╔████╔██║██████╔╝
+██╔══██║ ███╔╝  ██║   ██║██╔══██╗██╔══╝  ██║  ██║██║   ██║██║╚██╔╝██║██╔═══╝ 
+██║  ██║███████╗╚██████╔╝██║  ██║███████╗██████╔╝╚██████╔╝██║ ╚═╝ ██║██║     
+╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═════╝  ╚═════╝ ╚═╝     ╚═╝╚═╝
+"@
+
+    $colors = @("Cyan", "Yellow", "Magenta", "Green", "White", "Red")
+    $bannerLines = $banner -split "`n"
+
+    for ($i = 0; $i -lt $bannerLines.Length; $i++) {
+        Write-Host $bannerLines[$i] -ForegroundColor $colors[$i % $colors.Length]
+    }
+}
+Show-AzureDumpBanner
+
 #Connect to Azure Account
 function LoginToAzure {
     Write-Host "Logging in to your account" -ForegroundColor Cyan
