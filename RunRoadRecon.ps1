@@ -18,3 +18,6 @@
     Set-Content -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\.roadtools_auth.bak" -Value $auth
 
     RunRoadRecon
+    
+roadrecon-gui
+Write-Host "RoadRecon Complete, check http://127.0.0.1:5000 for results"
