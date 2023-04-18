@@ -8,19 +8,32 @@
       {
         "name": "AzureGRAPHDump",
         "file": "AzureGRAPHDump.ps1",
-        "enabled": false
+        "enabled": true
       },
       
       {
         "name": "GetTokens", 
         "file": "GetTokens.ps1",
         "enabled": true
-      }
+      },
+        
+      {
+        "name": "GetTokens", 
+        "file": "RunCrowdStrikeReportingTool.ps1",
+        "enabled": true
+      },
+        
+      {
+        "name": "AzureHound", 
+        "file": "RunAzureHound.ps1",
+        "enabled": true
+      },
 
-
-
-
-
+      {
+        "name": "RoadRecon", 
+        "file": "RunRoadRecon.ps1",
+        "enabled": true
+      },
 
 
     ]
