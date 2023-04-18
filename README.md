@@ -1,6 +1,6 @@
 # AzureDump
 
-##Installer
+## Installer
 
 The AzureDump Installer is a streamlined PowerShell script for setting up AzureDump, a robust Azure Active Directory enumeration tool. This installer automates the installation of required AZ modules and essential tools, such as AADInternals, PowerZure, AzureHound, Python 3.7, RoadRecon, and CrowdStrike's CRT.
 
