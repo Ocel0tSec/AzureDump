@@ -18,7 +18,7 @@
       },
         
       {
-        "name": "GetTokens", 
+        "name": "CRT", 
         "file": "RunCrowdStrikeReportingTool.ps1",
         "enabled": true
       },
@@ -30,11 +30,9 @@
       },
 
       {
-        "name": "RoadRecon", 
+        "name": "RoadRecon",
         "file": "RunRoadRecon.ps1",
         "enabled": true
-      },
-
-
+      }
     ]
   }
