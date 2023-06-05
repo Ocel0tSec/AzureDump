@@ -30,6 +30,18 @@ AzureDump generates well-organized Excel sheets containing the gathered data. Th
 
 The original version included an option of how you wanted to login (user/pass, device code) but settled on user prompts as MFA seems like it's going to be the norm.
 
+## Output
+- Users
+- Groups
+- Service Principals
+- Service Principals with credentials
+- Applications
+- Interesting URL's
+- Global Admins
+- MFA Enabled Users
+- Legacy Emial Protocols 
+- More to come? 
+
 ## Additional Features
 
 ### Customizable Script Execution
