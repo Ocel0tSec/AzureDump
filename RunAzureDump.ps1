@@ -8,11 +8,7 @@ function Show-AzureDumpBanner {
 ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═════╝  ╚═════╝ ╚═╝     ╚═╝╚═╝
 "@
 
-    $colors = @("Cyan", "Yellow", "Magenta", "Green", "White", "Red")
-    $bannerLines = $banner -split "`n"
-
-    for ($i = 0; $i -lt $bannerLines.Length; $i++) {
-        Write-Host $bannerLines[$i] -ForegroundColor $colors[$i % $colors.Length]
+        Write-Host $banner
     }
 }
 Show-AzureDumpBanner
