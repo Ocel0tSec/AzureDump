@@ -11,6 +11,17 @@ function Show-AzureDumpBanner {
 }
 Show-AzureDumpBanner
 
+#Check to see if Excel is installed 
+function CheckForExcel {
+    $excelType = [System.Type]::GetTypeFromProgID("Excel.Application")
+
+    if ($excelType -ne $null) {
+        Write-Host "`t[+] Microsoft Excel is installed. Continuing..." -ForegroundColor Green
+    } else {
+        Write-Host "`t[-] Microsoft Excel is not installed. Please install Excel to continue." -ForegroundColor Red
+    }
+}
+
 #Connect to Azure Account
 function LoginToAzure {
     Write-Host "Logging in to your account" -ForegroundColor Cyan
