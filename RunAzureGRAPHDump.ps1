@@ -74,7 +74,7 @@ function Get-GlobalAdmins{
     MfaCheck    
 
     #Get legacy mail protocols
-    Get-CASMailbox -ResultSize unlimited | Select-Object PrimarySMTPAddress, ActiveSyncEnabled, OWAEnabled, PopEnabled, ImapEnabled | Export-Csv -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\LegacyProtocols.csv" -NoTypeInformation
+    Get-CASMailbox -ResultSize unlimited | Select-Object PrimarySMTPAddress, ActiveSyncEnabled, EwsEnabled, PopEnabled, ImapEnabled | Export-Csv -Path "C:\Users\$([Environment]::UserName)\Desktop\AzFiles\LegacyProtocols.csv" -NoTypeInformation
 
 
 function Export-ConditionalAccessPoliciesToExcel {
@@ -392,7 +392,7 @@ function Convert-LegacyProtocolsCsvToExcel {
     $worksheet = $workbook.Worksheets.Item(1)
 
     # Set the header names and format
-    $headers = @("PrimarySmtpAddress", "ActiveSyncEnabled", "OWAEnabled", "PopEnabled", "ImapEnabled")
+    $headers = @("PrimarySmtpAddress", "ActiveSyncEnabled", "EwsEnabled", "PopEnabled", "ImapEnabled")
     for ($i = 1; $i -le $headers.Length; $i++) {
         $worksheet.Cells.Item(1, $i) = $headers[$i - 1]
         $worksheet.Cells.Item(1, $i).Font.Bold = $true
